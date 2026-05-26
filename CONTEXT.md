@@ -241,3 +241,27 @@ A URL or video file received by the Share Extension and stored in the
 App Group shared container, awaiting processing by the main app. The
 main app checks for pending imports on every foreground transition and
 drains the queue by running the import pipeline on each item.
+
+## Social URL Router
+
+The logic that inspects a shared URL and selects the correct extraction
+strategy before the LLM is called. Routes YouTube URLs to the
+YouTube Timedtext API, TikTok URLs to Rehydration JSON parsing, and
+recipe blog URLs to HTML scraping. Returns a plain text block that the
+LLM then structures. Distinct from ImportService — the Router is
+stateless platform detection; ImportService owns pipeline state.
+
+## Rehydration JSON
+
+The server-rendered JSON blob TikTok embeds in every video page HTML
+response under the `<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__">`
+tag. Contains the video caption (`desc`), audio-only CDN URL, and
+creator bio link. Parsed on-device via URLSession — no API key or
+signed request required for individual video lookups.
+
+## Ingredient Emoji
+
+A single Unicode emoji decorating an Ingredient in the recipe and
+grocery UIs. Resolved at display time by `IngredientEmojiMapper`:
+keyword-match on the parsed ingredient name first, then store-category
+fallback. Not stored in the model — purely presentational.
