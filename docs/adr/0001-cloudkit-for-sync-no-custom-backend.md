@@ -1,7 +1,8 @@
 # ADR 0001 — CloudKit for sync, no custom backend (for V1)
 
-- Status: Accepted
+- Status: Accepted — CloudKit integration deferred (see amendment below)
 - Date: 2026-05-22
+- Amended: 2026-05-25 (see "Amendment: Validation-phase deferral" below)
 
 ## Context
 
@@ -90,3 +91,52 @@ focused work. We are accepting this debt knowingly in exchange for V1 speed.
 - **Local-only (no sync).** Cheapest of all. Rejected because cross-device
   sync is table-stakes for a "credible paid app" in 2026 — users save a
   recipe on their phone and expect it on their iPad in the kitchen.
+
+---
+
+## Amendment: Validation-phase deferral (2026-05-25)
+
+> See ADR 0005 for the full rationale. This amendment documents only the
+> effect on ADR 0001.
+
+CloudKit integration requires a paid Apple Developer Program membership and
+the `iCloud` + `com.apple.developer.icloud-container-identifiers`
+entitlements. These are **commented out in `project.yml`** for the duration
+of solo feature validation.
+
+### What this changes during validation
+
+- All user data (Recipes, Collections, Meal Plans, Grocery Lists) is
+  persisted locally via SwiftData **without** CloudKit sync.
+- The `ModelConfiguration` in `MealKitApp` uses the local SQLite store
+  (`MealKit.sqlite`) with no `cloudKitContainerIdentifier`. Data is
+  real and durable across launches but not synced across devices.
+- Data created during validation is **not recoverable** after an app
+  reinstall or device wipe because there is no iCloud backup. This is
+  accepted for solo solo testing — the `DebugSeeder` repopulates
+  sample data automatically on first sign-in after any reset.
+
+### What does NOT change
+
+- The SwiftData schema is designed for CloudKit compatibility throughout
+  (all relationships have explicit delete rules and inverses, no
+  optional-set ambiguities, no unsupported types). Enabling CloudKit is
+  a one-line change in `project.yml` + a `ModelConfiguration` update.
+- ADR 0001's core decision — CloudKit, no custom backend — is unchanged.
+
+### Trigger for implementation
+
+Implementation of CloudKit sync (GitHub issue #15) unblocks when:
+
+1. Apple Developer Program enrollment is complete.
+2. The `iCloud` and CloudKit container entitlements are uncommented in
+   `project.yml`.
+3. The CloudKit schema is pushed to the container via Xcode's
+   "Use CloudKit" switch in the signing & capabilities pane.
+4. `MealKitApp` is updated to pass `cloudKitContainerIdentifier:` to
+   `ModelConfiguration`.
+
+Data migration from the validation period is not required — the solo
+tester's validation data can be left behind; the CloudKit container
+starts empty and the user rebuilds their library from scratch (or
+re-imports).

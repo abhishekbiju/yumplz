@@ -1,7 +1,8 @@
 # ADR 0003 — Sign in with Apple required at onboarding
 
-- Status: Accepted
+- Status: Accepted — implementation deferred (see amendment below)
 - Date: 2026-05-24
+- Amended: 2026-05-25 (see "Amendment: Validation-phase deferral" below)
 - Amends: ADR 0001 (CloudKit for sync, no custom backend) — specifically the
   "Zero auth UX" consequence
 
@@ -88,3 +89,51 @@ once shipped, but new versions can soften the requirement.
 - **Sign in with Apple + Sign in with Google.** Would require a backend
   to broker the dual identity. Same rejection as above; Apple-only is
   fine for an iOS-only app.
+
+---
+
+## Amendment: Validation-phase deferral (2026-05-25)
+
+> See ADR 0005 for the full rationale. This amendment documents only the
+> effect on ADR 0003.
+
+Sign in with Apple requires a paid Apple Developer Program membership
+($99/year) for the `com.apple.developer.applesignin` entitlement. The
+decision was made to validate all app features solo before enrolling, so
+the SIWA entitlement and the CloudKit/APS entitlements it depends on are
+**commented out in `project.yml`** for the duration of validation.
+
+### What this changes during validation
+
+- The `AuthenticationManager.signInAsDevUser()` method (`#if DEBUG` only)
+  provides a synthetic local `User` with Apple ID `"dev-bypass-user"`.
+  It is guarded by the Swift compiler — the symbol does not exist in
+  Release builds. Production users never see it.
+- The `SignInWithAppleView` shows a "Dev Sign In" button in `DEBUG`
+  builds alongside the real SIWA button. The real button is still present
+  and compiled; it will simply fail silently because the entitlement is
+  absent. Only the bypass button is pressed during solo development.
+- `DebugSeeder.seedIfNeeded(into:)` is called immediately after the dev
+  user signs in, populating the Library with 6 sample recipes so every
+  feature surface has realistic data without manual import.
+
+### What does NOT change
+
+- The production decision is unchanged: Sign in with Apple is required,
+  there is no anonymous mode, there is no skip option.
+- The `User` data model and `AuthenticationManager` logic are complete
+  and correct for production; only the entitlement is absent.
+
+### Trigger for implementation
+
+Implementation of the full SIWA flow (GitHub issue #14) unblocks when:
+
+1. Apple Developer Program enrollment is complete.
+2. The `com.apple.developer.applesignin` entitlement is uncommented in
+   `project.yml`.
+3. The `iCloud` and `APS` entitlements (required by CloudKit, issue #15)
+   are uncommented in the same file.
+4. A real provisioning profile is created and selected in Xcode.
+
+At that point, the `#if DEBUG` bypass can remain as a developer
+convenience — it does not need to be removed, since it is compiler-gated.
