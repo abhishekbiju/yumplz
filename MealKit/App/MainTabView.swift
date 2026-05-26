@@ -34,7 +34,7 @@ struct MainTabView: View {
                     .tabItem { Label("Library", systemImage: "books.vertical") }
             }
 
-            PlanView()
+            PlanView(downloads: downloads, inference: inference)
                 .tag(Tab.plan)
                 .tabItem { Label("Plan", systemImage: "calendar") }
 

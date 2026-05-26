@@ -2,9 +2,14 @@ import SwiftUI
 import SwiftData
 
 struct PlanView: View {
+    let downloads: ModelDownloadManager
+    let inference: InferenceService
+
     @State private var vm = PlanViewModel()
     @Query(sort: \PlannedMeal.date) private var allMeals: [PlannedMeal]
+    @Query(sort: \Recipe.createdAt, order: .reverse) private var allRecipes: [Recipe]
     @Environment(\.modelContext) private var context
+    @State private var showGenerationSheet = false
 
     private var mealsOnSelectedDay: [PlannedMeal] {
         allMeals.filter { Calendar.current.isDate($0.date, inSameDayAs: vm.selectedDate) }
@@ -44,7 +49,7 @@ struct PlanView: View {
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 100)
                     }
                 }
             }
@@ -66,19 +71,36 @@ struct PlanView: View {
                         .foregroundStyle(.secondary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        withAnimation(.mkGentle) { vm.nextWeek() }
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .fontWeight(.semibold)
+                    HStack(spacing: 16) {
+                        Button {
+                            withAnimation(.mkGentle) { vm.nextWeek() }
+                        } label: {
+                            Image(systemName: "chevron.right")
+                                .fontWeight(.semibold)
+                        }
+                        Button {
+                            showGenerationSheet = true
+                        } label: {
+                            Image(systemName: "sparkles")
+                                .fontWeight(.semibold)
+                        }
+                        .accessibilityLabel("Generate AI plan")
                     }
                 }
+            }
+            .sheet(isPresented: $showGenerationSheet) {
+                PlanGenerationSheet(
+                    downloads: downloads,
+                    inference: inference,
+                    allRecipes: allRecipes
+                )
+                .presentationDetents([.large])
             }
         }
     }
 }
 
 #Preview {
-    PlanView()
+    PlanView(downloads: ModelDownloadManager(), inference: InferenceService())
         .modelContainer(for: [Recipe.self, PlannedMeal.self], inMemory: true)
 }
