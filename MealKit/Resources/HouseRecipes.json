@@ -1,0 +1,739 @@
+[
+  {
+    "id": "shakshuka",
+    "title": "Shakshuka",
+    "summary": "Poached eggs in a rich spiced tomato and pepper sauce — a Middle Eastern classic that works for breakfast, brunch, or a quick weeknight dinner.",
+    "servings": 4,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 20,
+    "cuisine": "Middle Eastern",
+    "dietaryTags": ["vegetarian", "gluten-free"],
+    "tags": ["quick", "comfort", "featured"],
+    "ingredients": [
+      { "originalText": "2 tablespoons olive oil", "quantity": 2, "unit": "tbsp", "name": "olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 large onion, diced", "quantity": 1, "unit": null, "name": "onion", "prep": "diced", "storeCategory": "Produce" },
+      { "originalText": "1 red bell pepper, diced", "quantity": 1, "unit": null, "name": "red bell pepper", "prep": "diced", "storeCategory": "Produce" },
+      { "originalText": "4 cloves garlic, minced", "quantity": 4, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "1 teaspoon ground cumin", "quantity": 1, "unit": "tsp", "name": "ground cumin", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon smoked paprika", "quantity": 1, "unit": "tsp", "name": "smoked paprika", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon cayenne pepper", "quantity": 0.5, "unit": "tsp", "name": "cayenne pepper", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 can (28 oz) crushed tomatoes", "quantity": 1, "unit": "can", "name": "crushed tomatoes", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "6 large eggs", "quantity": 6, "unit": null, "name": "eggs", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "½ cup crumbled feta cheese", "quantity": 0.5, "unit": "cup", "name": "feta cheese", "prep": "crumbled", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "Fresh parsley for garnish", "quantity": null, "unit": null, "name": "fresh parsley", "prep": "chopped", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Heat olive oil in a large, deep skillet over medium heat. Add the onion and bell pepper and cook, stirring occasionally, until softened, about 8 minutes.", "timerSeconds": 480, "isSectionHeader": false },
+      { "text": "Add the garlic, cumin, paprika, and cayenne. Cook, stirring, for 1 minute until fragrant.", "timerSeconds": 60, "isSectionHeader": false },
+      { "text": "Pour in the crushed tomatoes. Season with salt and pepper. Reduce heat to medium-low and simmer for 5 minutes, stirring occasionally, until the sauce thickens slightly.", "timerSeconds": 300, "isSectionHeader": false },
+      { "text": "Use a spoon to create 6 wells in the sauce. Crack an egg into each well. Cover the pan and cook until the egg whites are just set but the yolks are still runny, about 5–7 minutes.", "timerSeconds": 360, "isSectionHeader": false },
+      { "text": "Remove from heat. Scatter feta and parsley over the top. Serve immediately with crusty bread for dipping.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 280, "proteinGrams": 14, "carbsGrams": 18, "fatGrams": 16 }
+  },
+  {
+    "id": "pad-thai",
+    "title": "Pad Thai",
+    "summary": "Classic Thai stir-fried rice noodles with shrimp, egg, and a tangy tamarind sauce topped with crunchy peanuts and fresh lime.",
+    "servings": 2,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 20,
+    "cuisine": "Thai",
+    "dietaryTags": ["gluten-free"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "200g flat rice noodles", "quantity": 200, "unit": "g", "name": "flat rice noodles", "prep": "soaked in warm water 15 min", "storeCategory": "Pantry" },
+      { "originalText": "200g medium shrimp, peeled and deveined", "quantity": 200, "unit": "g", "name": "shrimp", "prep": "peeled and deveined", "storeCategory": "Meat & Seafood" },
+      { "originalText": "2 tablespoons tamarind paste", "quantity": 2, "unit": "tbsp", "name": "tamarind paste", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "3 tablespoons fish sauce", "quantity": 3, "unit": "tbsp", "name": "fish sauce", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon palm sugar", "quantity": 1, "unit": "tbsp", "name": "palm sugar", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 tablespoons vegetable oil", "quantity": 2, "unit": "tbsp", "name": "vegetable oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "3 cloves garlic, minced", "quantity": 3, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "2 large eggs", "quantity": 2, "unit": null, "name": "eggs", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 spring onions, sliced", "quantity": 2, "unit": null, "name": "spring onions", "prep": "sliced", "storeCategory": "Produce" },
+      { "originalText": "60g bean sprouts", "quantity": 60, "unit": "g", "name": "bean sprouts", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "3 tablespoons crushed peanuts", "quantity": 3, "unit": "tbsp", "name": "peanuts", "prep": "crushed", "storeCategory": "Pantry" },
+      { "originalText": "1 lime, cut into wedges", "quantity": 1, "unit": null, "name": "lime", "prep": "cut into wedges", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Mix tamarind paste, fish sauce, and palm sugar in a small bowl to make the pad thai sauce. Set aside.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Heat oil in a wok over high heat until smoking. Add garlic and shrimp, stir-frying until shrimp turns pink, about 2 minutes.", "timerSeconds": 120, "isSectionHeader": false },
+      { "text": "Push the shrimp to one side. Add the drained noodles and pour the sauce over them. Toss everything together for 2 minutes.", "timerSeconds": 120, "isSectionHeader": false },
+      { "text": "Push noodles to the side and crack in the eggs. Scramble briefly, then mix through the noodles.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Add bean sprouts and spring onions. Toss for 30 seconds. Serve topped with crushed peanuts and lime wedges.", "timerSeconds": 30, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 520, "proteinGrams": 28, "carbsGrams": 62, "fatGrams": 18 }
+  },
+  {
+    "id": "beef-bourguignon",
+    "title": "Beef Bourguignon",
+    "summary": "Julia Child's legendary French beef stew slowly braised in a full bottle of Burgundy wine with pearl onions, mushrooms, and crispy lardons.",
+    "servings": 6,
+    "prepTimeMinutes": 30,
+    "cookTimeMinutes": 180,
+    "cuisine": "French",
+    "dietaryTags": [],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "1.5 kg beef chuck, cut into 5cm cubes", "quantity": 1500, "unit": "g", "name": "beef chuck", "prep": "cut into 5cm cubes", "storeCategory": "Meat & Seafood" },
+      { "originalText": "200g lardons or thick-cut bacon", "quantity": 200, "unit": "g", "name": "lardons", "prep": null, "storeCategory": "Meat & Seafood" },
+      { "originalText": "1 bottle (750ml) Burgundy or Pinot Noir", "quantity": 750, "unit": "ml", "name": "Burgundy wine", "prep": null, "storeCategory": "Beverages" },
+      { "originalText": "500ml beef stock", "quantity": 500, "unit": "ml", "name": "beef stock", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "200g pearl onions, peeled", "quantity": 200, "unit": "g", "name": "pearl onions", "prep": "peeled", "storeCategory": "Produce" },
+      { "originalText": "300g button mushrooms, quartered", "quantity": 300, "unit": "g", "name": "button mushrooms", "prep": "quartered", "storeCategory": "Produce" },
+      { "originalText": "3 cloves garlic, smashed", "quantity": 3, "unit": "clove", "name": "garlic", "prep": "smashed", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons tomato paste", "quantity": 2, "unit": "tbsp", "name": "tomato paste", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 tablespoons plain flour", "quantity": 2, "unit": "tbsp", "name": "plain flour", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 sprigs fresh thyme", "quantity": 2, "unit": null, "name": "fresh thyme", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "2 bay leaves", "quantity": 2, "unit": null, "name": "bay leaves", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "3 tablespoons unsalted butter", "quantity": 3, "unit": "tbsp", "name": "unsalted butter", "prep": null, "storeCategory": "Dairy & Eggs" }
+    ],
+    "steps": [
+      { "text": "Preheat oven to 160°C (325°F). Pat beef dry and season generously with salt and pepper. In a large Dutch oven, cook lardons over medium heat until golden and crispy. Remove and set aside, leaving fat in pot.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Increase heat to high. Working in batches, sear the beef cubes until deeply browned on all sides, about 4 minutes per batch. Do not crowd the pan. Remove and set aside.", "timerSeconds": 240, "isSectionHeader": false },
+      { "text": "Reduce heat to medium. Add garlic and tomato paste to the pot, stir for 1 minute. Sprinkle flour over the bottom and stir to coat. Pour in the wine and stock, scraping up all the brown bits. Return beef and lardons to the pot. Add thyme and bay leaves.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Bring to a simmer, then cover and transfer to the oven. Braise for 2½ hours, until the beef is completely tender and nearly falling apart.", "timerSeconds": 9000, "isSectionHeader": false },
+      { "text": "Meanwhile, melt butter in a skillet over medium-high heat. Sauté pearl onions until golden, about 5 minutes. Add mushrooms and cook until golden, 4 more minutes. Season with salt and pepper.", "timerSeconds": 540, "isSectionHeader": false },
+      { "text": "When the beef is done, stir in the pearl onions and mushrooms. Discard thyme sprigs and bay leaves. Adjust seasoning. Serve over egg noodles or mashed potatoes with a crusty baguette.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 580, "proteinGrams": 42, "carbsGrams": 14, "fatGrams": 28 }
+  },
+  {
+    "id": "banana-pancakes",
+    "title": "Banana Pancakes",
+    "summary": "Fluffy, golden pancakes naturally sweetened with ripe banana. Ready in 20 minutes — a perfect weekend breakfast.",
+    "servings": 2,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 15,
+    "cuisine": "American",
+    "dietaryTags": ["vegetarian"],
+    "tags": ["quick", "breakfast"],
+    "ingredients": [
+      { "originalText": "2 ripe bananas", "quantity": 2, "unit": null, "name": "ripe bananas", "prep": "mashed", "storeCategory": "Produce" },
+      { "originalText": "1 cup all-purpose flour", "quantity": 1, "unit": "cup", "name": "all-purpose flour", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 tablespoon baking powder", "quantity": 1, "unit": "tbsp", "name": "baking powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 tablespoon sugar", "quantity": 1, "unit": "tbsp", "name": "sugar", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "¼ teaspoon salt", "quantity": 0.25, "unit": "tsp", "name": "salt", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 cup milk", "quantity": 1, "unit": "cup", "name": "milk", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 large egg", "quantity": 1, "unit": null, "name": "egg", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 tablespoons melted butter", "quantity": 2, "unit": "tbsp", "name": "butter", "prep": "melted", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 teaspoon vanilla extract", "quantity": 1, "unit": "tsp", "name": "vanilla extract", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "Maple syrup to serve", "quantity": null, "unit": null, "name": "maple syrup", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "Mash the bananas in a large bowl until smooth. Whisk in the egg, milk, melted butter, and vanilla extract.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "In a separate bowl, whisk together flour, baking powder, sugar, and salt. Fold the dry ingredients into the wet ingredients until just combined — a few lumps are fine. Do not overmix.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Heat a non-stick skillet or griddle over medium heat and lightly grease with butter. Pour about ¼ cup of batter per pancake. Cook until bubbles form on the surface and the edges look set, about 2–3 minutes.", "timerSeconds": 150, "isSectionHeader": false },
+      { "text": "Flip and cook the second side until golden, about 1–2 minutes. Repeat with remaining batter.", "timerSeconds": 90, "isSectionHeader": false },
+      { "text": "Serve stacked with maple syrup and sliced banana on top.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 390, "proteinGrams": 11, "carbsGrams": 68, "fatGrams": 10 }
+  },
+  {
+    "id": "miso-soup",
+    "title": "Miso Soup",
+    "summary": "A warming, umami-rich Japanese broth with silken tofu, wakame seaweed, and spring onions. Ready in 15 minutes.",
+    "servings": 2,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 10,
+    "cuisine": "Japanese",
+    "dietaryTags": ["vegetarian", "vegan", "gluten-free"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "4 cups dashi stock or water", "quantity": 4, "unit": "cup", "name": "dashi stock", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "3 tablespoons white miso paste", "quantity": 3, "unit": "tbsp", "name": "white miso paste", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "150g silken tofu, cubed", "quantity": 150, "unit": "g", "name": "silken tofu", "prep": "cubed", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons dried wakame seaweed", "quantity": 2, "unit": "tbsp", "name": "dried wakame seaweed", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 spring onions, thinly sliced", "quantity": 2, "unit": null, "name": "spring onions", "prep": "thinly sliced", "storeCategory": "Produce" },
+      { "originalText": "1 teaspoon sesame oil", "quantity": 1, "unit": "tsp", "name": "sesame oil", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "Soak the dried wakame in cold water for 5 minutes until rehydrated. Drain and squeeze out excess water.", "timerSeconds": 300, "isSectionHeader": false },
+      { "text": "Bring dashi stock to a gentle simmer over medium heat. Do not boil.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "In a small bowl, whisk miso paste with a ladle of the hot stock until completely dissolved. Add back to the pot. Never boil miso — it destroys the flavour.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Gently add the tofu cubes and rehydrated wakame. Heat for 1–2 minutes until warmed through.", "timerSeconds": 90, "isSectionHeader": false },
+      { "text": "Ladle into bowls. Top with spring onions and a drizzle of sesame oil.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 95, "proteinGrams": 7, "carbsGrams": 8, "fatGrams": 3 }
+  },
+  {
+    "id": "fish-tacos",
+    "title": "Fish Tacos",
+    "summary": "Crispy pan-seared white fish in corn tortillas with lime crema, shredded cabbage, and fresh pico de gallo.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 15,
+    "cuisine": "Mexican",
+    "dietaryTags": ["gluten-free"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "500g white fish fillets (cod or tilapia)", "quantity": 500, "unit": "g", "name": "white fish fillets", "prep": null, "storeCategory": "Meat & Seafood" },
+      { "originalText": "8 small corn tortillas", "quantity": 8, "unit": null, "name": "corn tortillas", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 teaspoon chilli powder", "quantity": 1, "unit": "tsp", "name": "chilli powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon garlic powder", "quantity": 0.5, "unit": "tsp", "name": "garlic powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon cumin", "quantity": 0.5, "unit": "tsp", "name": "cumin", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "2 cups shredded green cabbage", "quantity": 2, "unit": "cup", "name": "green cabbage", "prep": "shredded", "storeCategory": "Produce" },
+      { "originalText": "½ cup sour cream", "quantity": 0.5, "unit": "cup", "name": "sour cream", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 tablespoons lime juice", "quantity": 2, "unit": "tbsp", "name": "lime juice", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "2 tomatoes, diced", "quantity": 2, "unit": null, "name": "tomatoes", "prep": "diced", "storeCategory": "Produce" },
+      { "originalText": "¼ cup fresh coriander, chopped", "quantity": 0.25, "unit": "cup", "name": "fresh coriander", "prep": "chopped", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Pat fish dry and cut into 2cm strips. Toss with chilli powder, garlic powder, cumin, salt, and a drizzle of oil.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Mix sour cream with half the lime juice in a small bowl to make the lime crema. Season with salt.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Combine tomatoes, coriander, and remaining lime juice in a bowl for a quick pico de gallo. Season with salt.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Heat a large skillet over medium-high heat with a drizzle of oil. Cook fish strips for 2–3 minutes per side until opaque and slightly charred.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Warm corn tortillas in a dry skillet or directly over a gas flame for 30 seconds each. Layer fish, cabbage, pico de gallo, and a drizzle of lime crema in each tortilla.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 340, "proteinGrams": 28, "carbsGrams": 32, "fatGrams": 10 }
+  },
+  {
+    "id": "lentil-dal",
+    "title": "Red Lentil Dal",
+    "summary": "A soul-warming Indian dal with red lentils, fragrant spices, and a sizzling tarka of mustard seeds and curry leaves.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 35,
+    "cuisine": "Indian",
+    "dietaryTags": ["vegan", "gluten-free"],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "300g red lentils, rinsed", "quantity": 300, "unit": "g", "name": "red lentils", "prep": "rinsed", "storeCategory": "Pantry" },
+      { "originalText": "1 large onion, finely diced", "quantity": 1, "unit": null, "name": "onion", "prep": "finely diced", "storeCategory": "Produce" },
+      { "originalText": "4 cloves garlic, minced", "quantity": 4, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "1 tablespoon fresh ginger, grated", "quantity": 1, "unit": "tbsp", "name": "fresh ginger", "prep": "grated", "storeCategory": "Produce" },
+      { "originalText": "1 can (400g) crushed tomatoes", "quantity": 400, "unit": "g", "name": "crushed tomatoes", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 teaspoon ground turmeric", "quantity": 1, "unit": "tsp", "name": "ground turmeric", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon ground cumin", "quantity": 1, "unit": "tsp", "name": "ground cumin", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon garam masala", "quantity": 1, "unit": "tsp", "name": "garam masala", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 tablespoon coconut oil", "quantity": 1, "unit": "tbsp", "name": "coconut oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 teaspoon mustard seeds", "quantity": 1, "unit": "tsp", "name": "mustard seeds", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "10 fresh curry leaves", "quantity": 10, "unit": null, "name": "fresh curry leaves", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "Juice of 1 lemon", "quantity": 1, "unit": null, "name": "lemon", "prep": "juiced", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Heat coconut oil in a large saucepan over medium heat. Add onion and cook until golden and soft, about 8 minutes.", "timerSeconds": 480, "isSectionHeader": false },
+      { "text": "Add garlic and ginger. Cook for 2 minutes until fragrant. Stir in turmeric, cumin, and garam masala and cook for 1 more minute.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Add crushed tomatoes and cook for 5 minutes, stirring occasionally, until the paste darkens and the oil starts to separate.", "timerSeconds": 300, "isSectionHeader": false },
+      { "text": "Add lentils and 900ml water. Bring to a boil, then reduce to a gentle simmer. Cook uncovered for 20 minutes, stirring occasionally, until lentils are completely soft and soupy.", "timerSeconds": 1200, "isSectionHeader": false },
+      { "text": "For the tarka: in a small pan, heat a splash of oil. Add mustard seeds and fry until they begin to pop, then add curry leaves (be careful — they will splutter). Pour immediately over the dal.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Stir in lemon juice and season well. Serve with basmati rice or warm naan.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 310, "proteinGrams": 18, "carbsGrams": 48, "fatGrams": 5 }
+  },
+  {
+    "id": "french-onion-soup",
+    "title": "French Onion Soup",
+    "summary": "Deeply caramelised onions in a rich beef broth, crowned with a toasted baguette crouton and a golden, bubbly Gruyère crust.",
+    "servings": 4,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 75,
+    "cuisine": "French",
+    "dietaryTags": [],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "1.2 kg yellow onions, thinly sliced", "quantity": 1200, "unit": "g", "name": "yellow onions", "prep": "thinly sliced", "storeCategory": "Produce" },
+      { "originalText": "4 tablespoons unsalted butter", "quantity": 4, "unit": "tbsp", "name": "unsalted butter", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 tablespoon olive oil", "quantity": 1, "unit": "tbsp", "name": "olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 teaspoon sugar", "quantity": 1, "unit": "tsp", "name": "sugar", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "½ cup dry white wine", "quantity": 0.5, "unit": "cup", "name": "dry white wine", "prep": null, "storeCategory": "Beverages" },
+      { "originalText": "1.5 litres good beef stock", "quantity": 1500, "unit": "ml", "name": "beef stock", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 sprigs fresh thyme", "quantity": 2, "unit": null, "name": "fresh thyme", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "1 bay leaf", "quantity": 1, "unit": null, "name": "bay leaf", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 baguette, sliced into rounds", "quantity": 1, "unit": null, "name": "baguette", "prep": "sliced into rounds", "storeCategory": "Bakery" },
+      { "originalText": "200g Gruyère cheese, grated", "quantity": 200, "unit": "g", "name": "Gruyère cheese", "prep": "grated", "storeCategory": "Dairy & Eggs" }
+    ],
+    "steps": [
+      { "text": "Melt butter and olive oil in a large, heavy-based pot over medium-low heat. Add all the onions and stir to coat. Cover and cook for 15 minutes until softened.", "timerSeconds": 900, "isSectionHeader": false },
+      { "text": "Remove lid, increase heat to medium. Sprinkle with sugar and a pinch of salt. Cook uncovered, stirring every 5 minutes, for 45 minutes until the onions are deep golden-brown and jammy. This step cannot be rushed.", "timerSeconds": 2700, "isSectionHeader": false },
+      { "text": "Add white wine and stir vigorously, scraping up all the fond from the bottom. Cook until the wine evaporates, about 3 minutes.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Add stock, thyme, and bay leaf. Bring to a simmer and cook for 15 minutes. Season with salt and pepper. Discard thyme and bay leaf.", "timerSeconds": 900, "isSectionHeader": false },
+      { "text": "Toast baguette rounds under the grill until golden. Ladle soup into oven-safe crocks. Top each with 2 toasted baguette rounds and a generous handful of Gruyère. Grill until bubbly and golden, about 3–4 minutes.", "timerSeconds": 240, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 420, "proteinGrams": 20, "carbsGrams": 38, "fatGrams": 19 }
+  },
+  {
+    "id": "acai-bowl",
+    "title": "Açaí Bowl",
+    "summary": "A thick, vibrant blend of frozen açaí and mixed berries, topped with granola, fresh fruit, coconut flakes, and a drizzle of honey.",
+    "servings": 1,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": null,
+    "cuisine": "American",
+    "dietaryTags": ["vegan", "gluten-free"],
+    "tags": ["quick", "breakfast"],
+    "ingredients": [
+      { "originalText": "100g frozen açaí purée", "quantity": 100, "unit": "g", "name": "frozen açaí purée", "prep": null, "storeCategory": "Frozen" },
+      { "originalText": "1 cup frozen mixed berries", "quantity": 1, "unit": "cup", "name": "frozen mixed berries", "prep": null, "storeCategory": "Frozen" },
+      { "originalText": "½ frozen banana", "quantity": 0.5, "unit": null, "name": "frozen banana", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "3 tablespoons almond milk", "quantity": 3, "unit": "tbsp", "name": "almond milk", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "¼ cup granola", "quantity": 0.25, "unit": "cup", "name": "granola", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "½ cup fresh strawberries, sliced", "quantity": 0.5, "unit": "cup", "name": "fresh strawberries", "prep": "sliced", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons coconut flakes, toasted", "quantity": 2, "unit": "tbsp", "name": "coconut flakes", "prep": "toasted", "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon almond butter", "quantity": 1, "unit": "tbsp", "name": "almond butter", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "Break the frozen açaí purée into chunks and place in a high-powered blender along with frozen berries, frozen banana, and almond milk.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Blend on high until completely smooth and the texture resembles thick soft-serve ice cream. If too thick, add a splash more almond milk. The base should be scoopable, not pourable.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Scoop into a chilled bowl. Work quickly as the base melts fast.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Top with granola, sliced strawberries, toasted coconut flakes, and a dollop of almond butter. Serve immediately.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 380, "proteinGrams": 9, "carbsGrams": 56, "fatGrams": 15 }
+  },
+  {
+    "id": "shrimp-stir-fry",
+    "title": "Garlic Shrimp Stir Fry",
+    "summary": "Juicy shrimp and crisp vegetables tossed in a savory garlic and ginger sauce. On the table in under 30 minutes.",
+    "servings": 2,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 15,
+    "cuisine": "Chinese",
+    "dietaryTags": ["gluten-free"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "350g large shrimp, peeled and deveined", "quantity": 350, "unit": "g", "name": "large shrimp", "prep": "peeled and deveined", "storeCategory": "Meat & Seafood" },
+      { "originalText": "1 cup broccoli florets", "quantity": 1, "unit": "cup", "name": "broccoli", "prep": "cut into florets", "storeCategory": "Produce" },
+      { "originalText": "1 red bell pepper, sliced", "quantity": 1, "unit": null, "name": "red bell pepper", "prep": "sliced", "storeCategory": "Produce" },
+      { "originalText": "1 cup snap peas", "quantity": 1, "unit": "cup", "name": "snap peas", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "5 cloves garlic, minced", "quantity": 5, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "1 tablespoon fresh ginger, grated", "quantity": 1, "unit": "tbsp", "name": "fresh ginger", "prep": "grated", "storeCategory": "Produce" },
+      { "originalText": "3 tablespoons soy sauce (or tamari for GF)", "quantity": 3, "unit": "tbsp", "name": "soy sauce", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon oyster sauce", "quantity": 1, "unit": "tbsp", "name": "oyster sauce", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 teaspoon sesame oil", "quantity": 1, "unit": "tsp", "name": "sesame oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon cornstarch", "quantity": 1, "unit": "tbsp", "name": "cornstarch", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 tablespoons vegetable oil", "quantity": 2, "unit": "tbsp", "name": "vegetable oil", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "In a small bowl, whisk together soy sauce, oyster sauce, sesame oil, and cornstarch to make the sauce. Set aside.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Heat vegetable oil in a wok over high heat until smoking. Add broccoli and bell pepper, stir-frying for 3 minutes until just tender-crisp.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Add snap peas, garlic, and ginger. Stir-fry for 1 minute.", "timerSeconds": 60, "isSectionHeader": false },
+      { "text": "Add shrimp and cook until they turn pink and curl, about 2 minutes.", "timerSeconds": 120, "isSectionHeader": false },
+      { "text": "Pour the sauce over everything. Toss to coat and cook for 1 minute until the sauce thickens and everything is glossy. Serve over steamed rice.", "timerSeconds": 60, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 320, "proteinGrams": 32, "carbsGrams": 18, "fatGrams": 12 }
+  },
+  {
+    "id": "mushroom-risotto",
+    "title": "Mushroom Risotto",
+    "summary": "Creamy, velvety Italian risotto loaded with wild mushrooms, Parmesan, and a splash of white wine. Genuine comfort in a bowl.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 35,
+    "cuisine": "Italian",
+    "dietaryTags": ["vegetarian"],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "300g Arborio rice", "quantity": 300, "unit": "g", "name": "Arborio rice", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "400g mixed mushrooms (cremini, shiitake, porcini), sliced", "quantity": 400, "unit": "g", "name": "mixed mushrooms", "prep": "sliced", "storeCategory": "Produce" },
+      { "originalText": "1 litre warm vegetable stock", "quantity": 1000, "unit": "ml", "name": "vegetable stock", "prep": "warmed", "storeCategory": "Pantry" },
+      { "originalText": "1 medium onion, finely diced", "quantity": 1, "unit": null, "name": "onion", "prep": "finely diced", "storeCategory": "Produce" },
+      { "originalText": "3 cloves garlic, minced", "quantity": 3, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "½ cup dry white wine", "quantity": 0.5, "unit": "cup", "name": "dry white wine", "prep": null, "storeCategory": "Beverages" },
+      { "originalText": "80g Parmesan, finely grated", "quantity": 80, "unit": "g", "name": "Parmesan", "prep": "finely grated", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 tablespoons unsalted butter", "quantity": 2, "unit": "tbsp", "name": "unsalted butter", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 tablespoons olive oil", "quantity": 2, "unit": "tbsp", "name": "olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "Fresh thyme leaves", "quantity": null, "unit": null, "name": "fresh thyme", "prep": "leaves picked", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Heat 1 tablespoon of olive oil in a large wide saucepan over high heat. Add the mushrooms in a single layer (cook in batches if needed) and sear without stirring for 2 minutes until golden. Season, toss, and cook 1 more minute. Set aside.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "In the same pan, heat remaining oil and 1 tablespoon butter over medium heat. Add onion and cook until translucent, 5 minutes. Add garlic and thyme, cook 1 more minute.", "timerSeconds": 360, "isSectionHeader": false },
+      { "text": "Add Arborio rice and stir to coat in the oil for 1 minute. Pour in white wine and stir until completely absorbed.", "timerSeconds": 60, "isSectionHeader": false },
+      { "text": "Add warm stock one ladleful at a time, stirring constantly and waiting until each ladle is absorbed before adding the next. This will take about 20 minutes.", "timerSeconds": 1200, "isSectionHeader": false },
+      { "text": "When the rice is al dente and the risotto is creamy and flows like lava, remove from heat. Stir in the remaining butter and Parmesan. Fold through the mushrooms. Season to taste and serve immediately.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 470, "proteinGrams": 14, "carbsGrams": 62, "fatGrams": 17 }
+  },
+  {
+    "id": "turkish-eggs",
+    "title": "Turkish Eggs (Çılbır)",
+    "summary": "Poached eggs served on a cloud of garlicky yoghurt, drizzled with chilli-infused brown butter and fresh dill. A Turkish breakfast masterpiece in 15 minutes.",
+    "servings": 2,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 10,
+    "cuisine": "Turkish",
+    "dietaryTags": ["vegetarian", "gluten-free"],
+    "tags": ["quick", "breakfast"],
+    "ingredients": [
+      { "originalText": "4 large eggs", "quantity": 4, "unit": null, "name": "eggs", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "250g full-fat Greek yoghurt", "quantity": 250, "unit": "g", "name": "Greek yoghurt", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 clove garlic, minced", "quantity": 1, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "50g unsalted butter", "quantity": 50, "unit": "g", "name": "unsalted butter", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 teaspoon Aleppo pepper (pul biber) or sweet paprika", "quantity": 1, "unit": "tsp", "name": "Aleppo pepper", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 tablespoon white wine vinegar", "quantity": 1, "unit": "tbsp", "name": "white wine vinegar", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "Fresh dill sprigs to garnish", "quantity": null, "unit": null, "name": "fresh dill", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "Crusty bread or toasted pitta to serve", "quantity": null, "unit": null, "name": "crusty bread", "prep": null, "storeCategory": "Bakery" }
+    ],
+    "steps": [
+      { "text": "Mix the yoghurt with the minced garlic and a pinch of salt. Divide between two warm serving plates, spreading it into wide pools.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Bring a wide saucepan of water to a gentle simmer. Add the white wine vinegar. Crack each egg into a small cup, create a swirl in the water, and gently slide in the egg. Poach for 3 minutes for a runny yolk. Remove with a slotted spoon and drain briefly on a towel.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Place two poached eggs on each yoghurt pool.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "In a small pan, melt the butter over medium-high heat. When it begins to foam and turns golden-brown and smells nutty, add the Aleppo pepper. It will sizzle and turn vibrant red. Immediately pour over the eggs.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Scatter with fresh dill. Serve immediately with crusty bread to soak up the yoghurt and butter.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 420, "proteinGrams": 22, "carbsGrams": 8, "fatGrams": 33 }
+  },
+  {
+    "id": "beef-tacos",
+    "title": "Beef Tacos",
+    "summary": "Seasoned ground beef in warm flour tortillas with all the classic toppings — cheese, salsa, sour cream, and jalapeños.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 15,
+    "cuisine": "Mexican",
+    "dietaryTags": [],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "500g ground beef (80/20)", "quantity": 500, "unit": "g", "name": "ground beef", "prep": null, "storeCategory": "Meat & Seafood" },
+      { "originalText": "8 flour tortillas", "quantity": 8, "unit": null, "name": "flour tortillas", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon chilli powder", "quantity": 1, "unit": "tbsp", "name": "chilli powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon ground cumin", "quantity": 1, "unit": "tsp", "name": "ground cumin", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon garlic powder", "quantity": 0.5, "unit": "tsp", "name": "garlic powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 cup grated cheddar cheese", "quantity": 1, "unit": "cup", "name": "cheddar cheese", "prep": "grated", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 cup salsa", "quantity": 1, "unit": "cup", "name": "salsa", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "½ cup sour cream", "quantity": 0.5, "unit": "cup", "name": "sour cream", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 avocado, sliced", "quantity": 1, "unit": null, "name": "avocado", "prep": "sliced", "storeCategory": "Produce" },
+      { "originalText": "1 jalapeño, sliced", "quantity": 1, "unit": null, "name": "jalapeño", "prep": "sliced", "storeCategory": "Produce" },
+      { "originalText": "Fresh coriander and lime wedges to serve", "quantity": null, "unit": null, "name": "fresh coriander", "prep": null, "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Heat a large skillet over medium-high heat. Add the ground beef and break it up with a wooden spoon. Cook until browned, about 5 minutes. Drain excess fat.", "timerSeconds": 300, "isSectionHeader": false },
+      { "text": "Add chilli powder, cumin, garlic powder, salt, and ¼ cup water. Stir to combine. Cook for 3–4 minutes until the water evaporates and the meat is well seasoned.", "timerSeconds": 240, "isSectionHeader": false },
+      { "text": "Warm the tortillas in a dry skillet for 30 seconds per side, or wrap in a damp paper towel and microwave for 30 seconds.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Spoon the beef into each tortilla. Top with cheese, salsa, avocado, sour cream, jalapeño, and coriander.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Serve with lime wedges for squeezing over.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 490, "proteinGrams": 30, "carbsGrams": 35, "fatGrams": 24 }
+  },
+  {
+    "id": "tom-yum-soup",
+    "title": "Tom Yum Soup",
+    "summary": "The quintessential Thai hot and sour soup — fragrant with lemongrass, galangal, and kaffir lime leaves, loaded with mushrooms and shrimp.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 15,
+    "cuisine": "Thai",
+    "dietaryTags": ["gluten-free"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "1 litre chicken stock", "quantity": 1000, "unit": "ml", "name": "chicken stock", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "300g shrimp, peeled", "quantity": 300, "unit": "g", "name": "shrimp", "prep": "peeled", "storeCategory": "Meat & Seafood" },
+      { "originalText": "200g oyster mushrooms, torn", "quantity": 200, "unit": "g", "name": "oyster mushrooms", "prep": "torn", "storeCategory": "Produce" },
+      { "originalText": "2 stalks lemongrass, bruised and cut into 5cm pieces", "quantity": 2, "unit": null, "name": "lemongrass", "prep": "bruised and cut into 5cm pieces", "storeCategory": "Produce" },
+      { "originalText": "5 slices galangal", "quantity": 5, "unit": "slice", "name": "galangal", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "6 kaffir lime leaves, torn", "quantity": 6, "unit": null, "name": "kaffir lime leaves", "prep": "torn", "storeCategory": "Produce" },
+      { "originalText": "3 tablespoons fish sauce", "quantity": 3, "unit": "tbsp", "name": "fish sauce", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "3 tablespoons lime juice", "quantity": 3, "unit": "tbsp", "name": "lime juice", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "1–2 tablespoons Thai chilli paste (nam prik pao)", "quantity": 1.5, "unit": "tbsp", "name": "Thai chilli paste", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "4 Thai bird's eye chillies, lightly crushed", "quantity": 4, "unit": null, "name": "bird's eye chillies", "prep": "lightly crushed", "storeCategory": "Produce" },
+      { "originalText": "Fresh coriander to garnish", "quantity": null, "unit": null, "name": "fresh coriander", "prep": null, "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Bring the chicken stock to a boil in a medium saucepan. Add lemongrass, galangal, kaffir lime leaves, and bird's eye chillies. Simmer for 5 minutes to infuse.", "timerSeconds": 300, "isSectionHeader": false },
+      { "text": "Add mushrooms and Thai chilli paste. Stir and cook for 2 minutes.", "timerSeconds": 120, "isSectionHeader": false },
+      { "text": "Add the shrimp and cook until pink and curled, about 2 minutes.", "timerSeconds": 120, "isSectionHeader": false },
+      { "text": "Remove from heat. Stir in fish sauce and lime juice. Taste and adjust — it should be bold, sour, and salty in equal measure.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Ladle into bowls and garnish with fresh coriander. The lemongrass and galangal are for flavour — warn guests not to eat them.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 165, "proteinGrams": 20, "carbsGrams": 9, "fatGrams": 5 }
+  },
+  {
+    "id": "buttermilk-waffles",
+    "title": "Classic Buttermilk Waffles",
+    "summary": "Crispy on the outside, light and fluffy inside — the definitive weekend waffle recipe made with tangy buttermilk batter.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 20,
+    "cuisine": "American",
+    "dietaryTags": ["vegetarian"],
+    "tags": ["breakfast"],
+    "ingredients": [
+      { "originalText": "2 cups all-purpose flour", "quantity": 2, "unit": "cup", "name": "all-purpose flour", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "2 tablespoons sugar", "quantity": 2, "unit": "tbsp", "name": "sugar", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon baking powder", "quantity": 1, "unit": "tbsp", "name": "baking powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon baking soda", "quantity": 0.5, "unit": "tsp", "name": "baking soda", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon salt", "quantity": 0.5, "unit": "tsp", "name": "salt", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "2 cups buttermilk", "quantity": 2, "unit": "cup", "name": "buttermilk", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 large eggs, separated", "quantity": 2, "unit": null, "name": "eggs", "prep": "separated", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "5 tablespoons melted unsalted butter", "quantity": 5, "unit": "tbsp", "name": "unsalted butter", "prep": "melted", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "1 teaspoon vanilla extract", "quantity": 1, "unit": "tsp", "name": "vanilla extract", "prep": null, "storeCategory": "Spices & Baking" }
+    ],
+    "steps": [
+      { "text": "In a large bowl, whisk together flour, sugar, baking powder, baking soda, and salt.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "In a separate bowl, whisk together buttermilk, egg yolks, melted butter, and vanilla. Pour the wet ingredients into the dry and stir until just combined — lumps are fine.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Beat the egg whites in a clean bowl until stiff peaks form. Gently fold into the batter in two additions — this keeps the waffles light and crispy.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Preheat your waffle iron and brush lightly with butter. Pour enough batter to fill the iron, close, and cook until golden and crispy, about 4–5 minutes.", "timerSeconds": 270, "isSectionHeader": false },
+      { "text": "Serve hot with maple syrup, fresh berries, and a knob of butter.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 420, "proteinGrams": 11, "carbsGrams": 52, "fatGrams": 18 }
+  },
+  {
+    "id": "margherita-pizza",
+    "title": "Margherita Pizza",
+    "summary": "The Neapolitan original — a thin, blistered crust topped with San Marzano tomato sauce, fresh mozzarella, and basil.",
+    "servings": 2,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 15,
+    "cuisine": "Italian",
+    "dietaryTags": ["vegetarian"],
+    "tags": [],
+    "ingredients": [
+      { "originalText": "1 ball pizza dough (250g)", "quantity": 250, "unit": "g", "name": "pizza dough", "prep": "at room temperature", "storeCategory": "Bakery" },
+      { "originalText": "½ cup San Marzano tomato sauce", "quantity": 0.5, "unit": "cup", "name": "San Marzano tomato sauce", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "200g fresh mozzarella, torn", "quantity": 200, "unit": "g", "name": "fresh mozzarella", "prep": "torn", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 tablespoons extra virgin olive oil", "quantity": 2, "unit": "tbsp", "name": "extra virgin olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "Small bunch fresh basil leaves", "quantity": null, "unit": null, "name": "fresh basil", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "Semolina or flour for dusting", "quantity": null, "unit": null, "name": "semolina", "prep": null, "storeCategory": "Spices & Baking" }
+    ],
+    "steps": [
+      { "text": "Place a pizza stone or baking tray in the oven. Preheat to maximum (250°C/480°F) for at least 30 minutes.", "timerSeconds": 1800, "isSectionHeader": false },
+      { "text": "On a lightly floured surface, stretch the dough by hand or roll it to a roughly 30cm circle, about 3mm thick. Transfer to a semolina-dusted pizza peel or flat baking sheet.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Spoon the tomato sauce onto the dough, leaving a 2cm border. Use the back of the spoon to spread it thin. Scatter the mozzarella evenly.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Slide the pizza onto the hot stone. Bake for 8–10 minutes until the crust is blistered and the cheese is bubbling and golden in spots.", "timerSeconds": 540, "isSectionHeader": false },
+      { "text": "Remove from oven. Top with fresh basil leaves and drizzle with extra virgin olive oil. Slice and serve immediately.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 560, "proteinGrams": 24, "carbsGrams": 62, "fatGrams": 22 }
+  },
+  {
+    "id": "lamb-kofta",
+    "title": "Lamb Kofta",
+    "summary": "Spiced Middle Eastern minced lamb patties grilled on skewers until charred outside and juicy inside, served with tzatziki and flatbreads.",
+    "servings": 4,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 20,
+    "cuisine": "Middle Eastern",
+    "dietaryTags": [],
+    "tags": [],
+    "ingredients": [
+      { "originalText": "600g minced lamb", "quantity": 600, "unit": "g", "name": "minced lamb", "prep": null, "storeCategory": "Meat & Seafood" },
+      { "originalText": "1 onion, grated", "quantity": 1, "unit": null, "name": "onion", "prep": "grated", "storeCategory": "Produce" },
+      { "originalText": "3 cloves garlic, minced", "quantity": 3, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons fresh flat-leaf parsley, chopped", "quantity": 2, "unit": "tbsp", "name": "fresh flat-leaf parsley", "prep": "chopped", "storeCategory": "Produce" },
+      { "originalText": "1 teaspoon ground cumin", "quantity": 1, "unit": "tsp", "name": "ground cumin", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon ground coriander", "quantity": 1, "unit": "tsp", "name": "ground coriander", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon ground cinnamon", "quantity": 0.5, "unit": "tsp", "name": "ground cinnamon", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon smoked paprika", "quantity": 0.5, "unit": "tsp", "name": "smoked paprika", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "½ teaspoon cayenne", "quantity": 0.5, "unit": "tsp", "name": "cayenne", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "Tzatziki and flatbreads to serve", "quantity": null, "unit": null, "name": "tzatziki", "prep": null, "storeCategory": "Dairy & Eggs" }
+    ],
+    "steps": [
+      { "text": "Combine the minced lamb, grated onion, garlic, parsley, and all the spices in a large bowl. Season generously with salt and pepper. Mix with your hands until everything is well combined.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Divide the mixture into 12 equal portions. Mould each onto a flat metal skewer, squeezing and shaping into a long sausage about 12cm long. If you don't have skewers, shape into small oval patties.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Refrigerate for 20 minutes to help them hold their shape (optional if short on time).", "timerSeconds": 1200, "isSectionHeader": false },
+      { "text": "Grill on a very hot barbecue or griddle pan for 3–4 minutes per side, turning once, until nicely charred outside and just cooked through.", "timerSeconds": 420, "isSectionHeader": false },
+      { "text": "Serve with tzatziki, warm flatbreads, sliced tomato, and a squeeze of lemon.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 380, "proteinGrams": 28, "carbsGrams": 4, "fatGrams": 28 }
+  },
+  {
+    "id": "green-smoothie-bowl",
+    "title": "Green Smoothie Bowl",
+    "summary": "A thick, nutrient-packed blend of spinach, banana, and mango, topped with seeds, berries, and coconut for a fresh energising breakfast.",
+    "servings": 1,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": null,
+    "cuisine": "American",
+    "dietaryTags": ["vegan", "gluten-free"],
+    "tags": ["quick", "breakfast"],
+    "ingredients": [
+      { "originalText": "1 frozen banana", "quantity": 1, "unit": null, "name": "frozen banana", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "1 cup frozen mango chunks", "quantity": 1, "unit": "cup", "name": "frozen mango", "prep": null, "storeCategory": "Frozen" },
+      { "originalText": "1 big handful baby spinach", "quantity": 1, "unit": null, "name": "baby spinach", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "½ cup coconut water", "quantity": 0.5, "unit": "cup", "name": "coconut water", "prep": null, "storeCategory": "Beverages" },
+      { "originalText": "1 tablespoon chia seeds", "quantity": 1, "unit": "tbsp", "name": "chia seeds", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "¼ cup fresh blueberries", "quantity": 0.25, "unit": "cup", "name": "fresh blueberries", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons hemp seeds", "quantity": 2, "unit": "tbsp", "name": "hemp seeds", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 tablespoons coconut flakes", "quantity": 2, "unit": "tbsp", "name": "coconut flakes", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "Add frozen banana, frozen mango, baby spinach, and coconut water to a high-speed blender. Blend until completely smooth and thick.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "The base should be thick enough to eat with a spoon — if it's too thin, add more frozen fruit. Pour into a bowl.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Top with blueberries, chia seeds, hemp seeds, and coconut flakes.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Serve immediately before the base melts.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 320, "proteinGrams": 10, "carbsGrams": 58, "fatGrams": 8 }
+  },
+  {
+    "id": "pesto-pasta",
+    "title": "Pesto Pasta",
+    "summary": "Linguine tossed with vibrant homemade basil pesto, toasted pine nuts, and a shower of Parmesan. Weeknight dinner in under 20 minutes.",
+    "servings": 4,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 15,
+    "cuisine": "Italian",
+    "dietaryTags": ["vegetarian"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "400g linguine or spaghetti", "quantity": 400, "unit": "g", "name": "linguine", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "60g fresh basil leaves", "quantity": 60, "unit": "g", "name": "fresh basil", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "50g pine nuts, toasted", "quantity": 50, "unit": "g", "name": "pine nuts", "prep": "toasted", "storeCategory": "Pantry" },
+      { "originalText": "50g Parmesan, finely grated", "quantity": 50, "unit": "g", "name": "Parmesan", "prep": "finely grated", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 cloves garlic", "quantity": 2, "unit": "clove", "name": "garlic", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "120ml good-quality extra virgin olive oil", "quantity": 120, "unit": "ml", "name": "extra virgin olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "Juice of ½ lemon", "quantity": 0.5, "unit": null, "name": "lemon", "prep": "juiced", "storeCategory": "Produce" },
+      { "originalText": "Extra Parmesan and basil to serve", "quantity": null, "unit": null, "name": "Parmesan", "prep": null, "storeCategory": "Dairy & Eggs" }
+    ],
+    "steps": [
+      { "text": "Cook pasta in well-salted boiling water until al dente according to the packet instructions. Reserve 1 cup of pasta cooking water before draining.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "For the pesto: combine basil, pine nuts, Parmesan, and garlic in a food processor. Pulse until roughly chopped. With the motor running, slowly stream in the olive oil until you reach a thick, glossy sauce. Season with salt and lemon juice.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Return the drained pasta to the pot over very low heat. Add the pesto and toss to coat, adding splashes of pasta water to loosen the sauce until it clings to every strand.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Serve immediately in warm bowls topped with extra Parmesan, toasted pine nuts, and fresh basil.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 590, "proteinGrams": 16, "carbsGrams": 68, "fatGrams": 28 }
+  },
+  {
+    "id": "korean-fried-chicken",
+    "title": "Korean Fried Chicken",
+    "summary": "Impossibly crispy double-fried chicken wings glazed in a sweet, spicy, and sticky gochujang sauce. Pure comfort food.",
+    "servings": 4,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 40,
+    "cuisine": "Korean",
+    "dietaryTags": [],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "1.2 kg chicken wings, split at the joint", "quantity": 1200, "unit": "g", "name": "chicken wings", "prep": "split at the joint", "storeCategory": "Meat & Seafood" },
+      { "originalText": "½ cup cornstarch", "quantity": 0.5, "unit": "cup", "name": "cornstarch", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "3 tablespoons gochujang", "quantity": 3, "unit": "tbsp", "name": "gochujang", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "3 tablespoons soy sauce", "quantity": 3, "unit": "tbsp", "name": "soy sauce", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 tablespoons honey", "quantity": 2, "unit": "tbsp", "name": "honey", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 tablespoon rice vinegar", "quantity": 1, "unit": "tbsp", "name": "rice vinegar", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "4 cloves garlic, minced", "quantity": 4, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "1 tablespoon fresh ginger, grated", "quantity": 1, "unit": "tbsp", "name": "fresh ginger", "prep": "grated", "storeCategory": "Produce" },
+      { "originalText": "1 tablespoon sesame oil", "quantity": 1, "unit": "tbsp", "name": "sesame oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "Sesame seeds and spring onions to garnish", "quantity": null, "unit": null, "name": "sesame seeds", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "Vegetable oil for frying", "quantity": null, "unit": null, "name": "vegetable oil", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "Pat the chicken wings dry and season with salt and pepper. Toss in cornstarch until thoroughly coated, shaking off any excess.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Heat vegetable oil in a deep saucepan to 160°C (320°F). Fry the wings in batches for 8 minutes, then remove and drain on a wire rack. This is the first fry.", "timerSeconds": 480, "isSectionHeader": false },
+      { "text": "Increase oil temperature to 190°C (375°F). Fry the wings again for 3–4 minutes until deeply golden and shatteringly crispy. The double-fry is what makes Korean fried chicken special.", "timerSeconds": 240, "isSectionHeader": false },
+      { "text": "While the chicken fries, combine gochujang, soy sauce, honey, rice vinegar, garlic, ginger, and sesame oil in a small saucepan. Simmer for 3 minutes until slightly thickened.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Toss the hot fried wings in the sauce until every piece is glazed. Pile onto a plate and scatter with sesame seeds and sliced spring onions.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 520, "proteinGrams": 35, "carbsGrams": 28, "fatGrams": 30 }
+  },
+  {
+    "id": "baked-salmon",
+    "title": "Baked Salmon with Lemon Herb Crust",
+    "summary": "Flaky Atlantic salmon baked with a golden crust of breadcrumbs, lemon zest, garlic, and fresh herbs. Healthy, fast, and impressive.",
+    "servings": 4,
+    "prepTimeMinutes": 5,
+    "cookTimeMinutes": 20,
+    "cuisine": "Mediterranean",
+    "dietaryTags": ["gluten-free"],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "4 salmon fillets (about 160g each)", "quantity": 640, "unit": "g", "name": "salmon fillets", "prep": null, "storeCategory": "Meat & Seafood" },
+      { "originalText": "Zest of 1 lemon", "quantity": 1, "unit": null, "name": "lemon", "prep": "zested", "storeCategory": "Produce" },
+      { "originalText": "2 cloves garlic, minced", "quantity": 2, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons fresh dill, chopped", "quantity": 2, "unit": "tbsp", "name": "fresh dill", "prep": "chopped", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons fresh flat-leaf parsley, chopped", "quantity": 2, "unit": "tbsp", "name": "fresh parsley", "prep": "chopped", "storeCategory": "Produce" },
+      { "originalText": "3 tablespoons olive oil", "quantity": 3, "unit": "tbsp", "name": "olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "Salt and freshly ground black pepper", "quantity": null, "unit": null, "name": "black pepper", "prep": "freshly ground", "storeCategory": "Spices & Baking" },
+      { "originalText": "Lemon wedges to serve", "quantity": null, "unit": null, "name": "lemon", "prep": "cut into wedges", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Preheat oven to 200°C (400°F). Line a baking tray with parchment paper.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Mix together lemon zest, minced garlic, dill, parsley, and olive oil in a small bowl. Season with salt and pepper.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Place salmon fillets on the prepared tray, skin-side down. Season with salt and pepper. Spoon and press the herb mixture evenly over the top of each fillet.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Bake for 12–15 minutes until the salmon flakes easily with a fork and the top is lightly golden. The centre should still be slightly pink and moist.", "timerSeconds": 780, "isSectionHeader": false },
+      { "text": "Serve with lemon wedges, roasted vegetables, or a green salad.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 350, "proteinGrams": 38, "carbsGrams": 1, "fatGrams": 21 }
+  },
+  {
+    "id": "vegetable-curry",
+    "title": "Coconut Vegetable Curry",
+    "summary": "A vibrant, fragrant Thai-spiced coconut curry loaded with sweet potato, chickpeas, and spinach. Vegan, warming, and deeply satisfying.",
+    "servings": 4,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": 35,
+    "cuisine": "Indian",
+    "dietaryTags": ["vegan", "gluten-free"],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "2 tablespoons coconut oil", "quantity": 2, "unit": "tbsp", "name": "coconut oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 large onion, diced", "quantity": 1, "unit": null, "name": "onion", "prep": "diced", "storeCategory": "Produce" },
+      { "originalText": "4 cloves garlic, minced", "quantity": 4, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "1 tablespoon fresh ginger, grated", "quantity": 1, "unit": "tbsp", "name": "fresh ginger", "prep": "grated", "storeCategory": "Produce" },
+      { "originalText": "2 tablespoons curry powder", "quantity": 2, "unit": "tbsp", "name": "curry powder", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon ground turmeric", "quantity": 1, "unit": "tsp", "name": "ground turmeric", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 large sweet potato, peeled and cubed", "quantity": 1, "unit": null, "name": "sweet potato", "prep": "peeled and cubed", "storeCategory": "Produce" },
+      { "originalText": "1 can (400g) chickpeas, drained", "quantity": 400, "unit": "g", "name": "chickpeas", "prep": "drained", "storeCategory": "Pantry" },
+      { "originalText": "1 can (400ml) full-fat coconut milk", "quantity": 400, "unit": "ml", "name": "coconut milk", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "1 can (400g) chopped tomatoes", "quantity": 400, "unit": "g", "name": "chopped tomatoes", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "100g baby spinach", "quantity": 100, "unit": "g", "name": "baby spinach", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "Juice of 1 lime", "quantity": 1, "unit": null, "name": "lime", "prep": "juiced", "storeCategory": "Produce" }
+    ],
+    "steps": [
+      { "text": "Heat coconut oil in a large saucepan over medium heat. Add onion and cook until softened and golden, about 8 minutes.", "timerSeconds": 480, "isSectionHeader": false },
+      { "text": "Add garlic and ginger. Cook for 1 minute. Add curry powder and turmeric, stirring constantly for 1 minute until fragrant.", "timerSeconds": 120, "isSectionHeader": false },
+      { "text": "Add sweet potato, chickpeas, chopped tomatoes, and coconut milk. Stir well to combine. Bring to a simmer.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Cook uncovered for 20 minutes, stirring occasionally, until the sweet potato is tender and the sauce has thickened.", "timerSeconds": 1200, "isSectionHeader": false },
+      { "text": "Stir in the baby spinach until wilted. Squeeze in lime juice and season with salt. Serve over steamed basmati rice.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 380, "proteinGrams": 12, "carbsGrams": 44, "fatGrams": 18 }
+  },
+  {
+    "id": "caesar-salad",
+    "title": "Caesar Salad",
+    "summary": "The classic — crisp romaine lettuce, garlicky anchovy dressing, hand-torn croutons, and a generous shower of Parmesan.",
+    "servings": 4,
+    "prepTimeMinutes": 15,
+    "cookTimeMinutes": null,
+    "cuisine": "American",
+    "dietaryTags": [],
+    "tags": ["quick"],
+    "ingredients": [
+      { "originalText": "2 heads romaine lettuce, torn", "quantity": 2, "unit": null, "name": "romaine lettuce", "prep": "torn into large pieces", "storeCategory": "Produce" },
+      { "originalText": "80g Parmesan, finely shaved", "quantity": 80, "unit": "g", "name": "Parmesan", "prep": "finely shaved", "storeCategory": "Dairy & Eggs" },
+      { "originalText": "4 anchovy fillets, minced", "quantity": 4, "unit": null, "name": "anchovy fillets", "prep": "minced", "storeCategory": "Pantry" },
+      { "originalText": "2 cloves garlic, minced", "quantity": 2, "unit": "clove", "name": "garlic", "prep": "minced", "storeCategory": "Produce" },
+      { "originalText": "1 egg yolk", "quantity": 1, "unit": null, "name": "egg yolk", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "2 teaspoons Dijon mustard", "quantity": 2, "unit": "tsp", "name": "Dijon mustard", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 tablespoons lemon juice", "quantity": 2, "unit": "tbsp", "name": "lemon juice", "prep": null, "storeCategory": "Produce" },
+      { "originalText": "80ml extra virgin olive oil", "quantity": 80, "unit": "ml", "name": "extra virgin olive oil", "prep": null, "storeCategory": "Pantry" },
+      { "originalText": "2 cups sourdough croutons", "quantity": 2, "unit": "cup", "name": "sourdough croutons", "prep": null, "storeCategory": "Bakery" },
+      { "originalText": "½ teaspoon Worcestershire sauce", "quantity": 0.5, "unit": "tsp", "name": "Worcestershire sauce", "prep": null, "storeCategory": "Pantry" }
+    ],
+    "steps": [
+      { "text": "Make the dressing: in a wide salad bowl, mash the anchovy fillets and garlic with the back of a fork until a paste forms. Whisk in the egg yolk, Dijon mustard, lemon juice, and Worcestershire sauce.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Slowly drizzle in the olive oil while whisking constantly until the dressing is thick and emulsified. Season with salt and plenty of freshly cracked black pepper.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Add the romaine to the bowl. Toss to coat every leaf thoroughly with the dressing.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Add the croutons and half the Parmesan. Toss again gently.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Pile into individual bowls or onto a large platter. Top with the remaining Parmesan shavings and serve immediately.", "timerSeconds": null, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 290, "proteinGrams": 10, "carbsGrams": 18, "fatGrams": 20 }
+  },
+  {
+    "id": "chocolate-lava-cake",
+    "title": "Chocolate Lava Cake",
+    "summary": "Individual molten chocolate cakes with a warm, flowing centre — ready in 22 minutes and completely irresistible.",
+    "servings": 4,
+    "prepTimeMinutes": 10,
+    "cookTimeMinutes": 12,
+    "cuisine": "French",
+    "dietaryTags": ["vegetarian"],
+    "tags": ["comfort"],
+    "ingredients": [
+      { "originalText": "150g dark chocolate (70%), chopped", "quantity": 150, "unit": "g", "name": "dark chocolate", "prep": "chopped", "storeCategory": "Pantry" },
+      { "originalText": "100g unsalted butter, plus extra for greasing", "quantity": 100, "unit": "g", "name": "unsalted butter", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "3 large eggs", "quantity": 3, "unit": null, "name": "eggs", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "3 large egg yolks", "quantity": 3, "unit": null, "name": "egg yolks", "prep": null, "storeCategory": "Dairy & Eggs" },
+      { "originalText": "120g icing sugar, sifted", "quantity": 120, "unit": "g", "name": "icing sugar", "prep": "sifted", "storeCategory": "Spices & Baking" },
+      { "originalText": "40g plain flour, plus extra for dusting", "quantity": 40, "unit": "g", "name": "plain flour", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "1 teaspoon vanilla extract", "quantity": 1, "unit": "tsp", "name": "vanilla extract", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "Pinch of salt", "quantity": null, "unit": "pinch", "name": "salt", "prep": null, "storeCategory": "Spices & Baking" },
+      { "originalText": "Vanilla ice cream to serve", "quantity": null, "unit": null, "name": "vanilla ice cream", "prep": null, "storeCategory": "Frozen" }
+    ],
+    "steps": [
+      { "text": "Preheat oven to 200°C (400°F). Butter and flour four individual ramekins or dariole moulds, tapping out any excess flour.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Melt the chocolate and butter together in a heatproof bowl set over a pan of barely simmering water, stirring until smooth. Remove from heat and let cool slightly.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "In a large bowl, whisk the whole eggs, egg yolks, and icing sugar together until thick and pale, about 3 minutes. Whisk in the vanilla extract.", "timerSeconds": 180, "isSectionHeader": false },
+      { "text": "Fold the chocolate mixture into the egg mixture until just combined. Sift in the flour and salt and fold gently until no streaks remain.", "timerSeconds": null, "isSectionHeader": false },
+      { "text": "Divide the batter among the prepared ramekins. Bake for 10–12 minutes until the edges are set but the centre still jiggles slightly when you shake the pan.", "timerSeconds": 660, "isSectionHeader": false },
+      { "text": "Leave to stand for 1 minute, then carefully invert each ramekin onto a warm plate. Serve immediately with vanilla ice cream.", "timerSeconds": 60, "isSectionHeader": false }
+    ],
+    "nutrition": { "calories": 490, "proteinGrams": 9, "carbsGrams": 48, "fatGrams": 30 }
+  }
+]

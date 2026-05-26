@@ -15,15 +15,24 @@ struct MainTabView: View {
     // ImportService is derived from the above three.
     @State private var importService: ImportService?
 
+    // House Recipes for the Discover tab.
+    @State private var houseRecipeStore = HouseRecipeStore()
+
     enum Tab: Hashable {
         case discover, library, plan, grocery, profile
     }
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            DiscoverView()
-                .tag(Tab.discover)
-                .tabItem { Label("Discover", systemImage: "sparkles") }
+            if let importService {
+                DiscoverView(store: houseRecipeStore, importService: importService)
+                    .tag(Tab.discover)
+                    .tabItem { Label("Discover", systemImage: "sparkles") }
+            } else {
+                ProgressView()
+                    .tag(Tab.discover)
+                    .tabItem { Label("Discover", systemImage: "sparkles") }
+            }
 
             if let importService {
                 LibraryView(downloads: downloads, importService: importService)
@@ -58,6 +67,7 @@ struct MainTabView: View {
                     whisper: whisper
                 )
             }
+            houseRecipeStore.load()
         }
     }
 }
