@@ -289,6 +289,9 @@ private struct GroceryItemRow: View {
             }
             .buttonStyle(.plain)
 
+            Text(IngredientEmojiMapper.emoji(for: item))
+                .font(.body)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name.capitalized)
                     .font(.mkBody)

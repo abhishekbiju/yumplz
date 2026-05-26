@@ -167,11 +167,9 @@ struct RecipeDetailView: View {
         sectionBlock(header: "Ingredients") {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(ingredients) { ingredient in
-                    HStack(alignment: .top, spacing: 10) {
-                        Circle()
-                            .fill(Color.accentColor.opacity(0.45))
-                            .frame(width: 6, height: 6)
-                            .padding(.top, 7)
+                    HStack(spacing: 10) {
+                        Text(IngredientEmojiMapper.emoji(for: ingredient))
+                            .font(.body)
                         Text(ingredient.originalText)
                             .font(.mkBody)
                     }
