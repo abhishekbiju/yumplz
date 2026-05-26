@@ -10,12 +10,14 @@ struct PlanGenerationSheet: View {
     let inference: InferenceService
     let allRecipes: [Recipe]
 
-    @Environment(\.modelContext) private var context
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext)            private var context
+    @Environment(\.dismiss)                 private var dismiss
+    @Environment(UserPreferencesStore.self) private var prefs
 
     // Constraint form state
     @State private var numberOfDays: Int = 7
     @State private var selectedDietaryTags: Set<String> = []
+    @State private var hasAppliedPrefsDefaults = false
     @State private var excludedCuisine: String = ""
     @State private var maxCookTime: MaxCookTimeOption = .any
     @State private var servings: Int = 2
@@ -53,6 +55,12 @@ struct PlanGenerationSheet: View {
             .navigationTitle("Generate Plan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
+            .onAppear {
+                if !hasAppliedPrefsDefaults {
+                    selectedDietaryTags = prefs.dietaryDefaults
+                    hasAppliedPrefsDefaults = true
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

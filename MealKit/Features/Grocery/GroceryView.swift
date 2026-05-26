@@ -14,7 +14,8 @@ struct GroceryView: View {
         order: .reverse
     ) private var archivedLists: [GroceryList]
 
-    @Environment(\.modelContext) private var context
+    @Environment(\.modelContext)            private var context
+    @Environment(UserPreferencesStore.self) private var prefs
 
     @State private var showGenerateSheet = false
     @State private var showArchivedSheet = false
@@ -73,7 +74,7 @@ struct GroceryView: View {
 
         return List {
             // Unchecked grouped by category
-            ForEach(StoreCategory.defaultOrder, id: \.self) { cat in
+            ForEach(prefs.storeCategoryOrder, id: \.self) { cat in
                 let catItems = unchecked.filter { $0.storeCategory == cat }
                 if !catItems.isEmpty {
                     Section(cat.displayName) {

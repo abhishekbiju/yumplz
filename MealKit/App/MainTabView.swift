@@ -10,6 +10,7 @@ struct MainTabView: View {
     @State private var downloads = ModelDownloadManager()
     @State private var inference = InferenceService()
     @State private var whisper  = WhisperTranscriptionService()
+    @State private var prefs    = UserPreferencesStore()
 
     // ImportService is derived from the above three.
     @State private var importService: ImportService?
@@ -46,6 +47,7 @@ struct MainTabView: View {
                 .tag(Tab.profile)
                 .tabItem { Label("Profile", systemImage: "person.crop.circle") }
         }
+        .environment(prefs)
         .tint(.accentColor)
         .task {
             // Wire ImportService once on first appearance.

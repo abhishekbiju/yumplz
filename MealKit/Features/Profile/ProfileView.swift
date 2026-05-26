@@ -1,10 +1,6 @@
 import SwiftUI
 import SwiftData
 
-/// Profile tab — identity card, subscription state, settings sections,
-/// Sign Out, Delete Account (Q15). The full settings sub-screens land in a
-/// later round; this first cut wires identity + Sign Out so we can exercise
-/// the auth round-trip end-to-end.
 struct ProfileView: View {
     @Environment(AuthenticationManager.self) private var auth
     @State private var showSignOutConfirmation = false
@@ -25,16 +21,36 @@ struct ProfileView: View {
                 }
 
                 Section("Settings") {
-                    placeholderRow("Preferences", systemImage: "gear")
-                    placeholderRow("Plan & Grocery defaults", systemImage: "calendar.badge.checkmark")
-                    placeholderRow("Notifications", systemImage: "bell.badge")
-                    placeholderRow("Appearance", systemImage: "paintbrush")
-                    placeholderRow("Privacy", systemImage: "hand.raised")
+                    NavigationLink {
+                        PreferencesView()
+                    } label: {
+                        Label("Preferences", systemImage: "gear")
+                    }
+                    NavigationLink {
+                        PlanGroceryDefaultsView()
+                    } label: {
+                        Label("Plan & Grocery defaults", systemImage: "calendar.badge.checkmark")
+                    }
+                    NavigationLink {
+                        NotificationsView()
+                    } label: {
+                        Label("Notifications", systemImage: "bell.badge")
+                    }
+                    NavigationLink {
+                        AppearanceView()
+                    } label: {
+                        Label("Appearance", systemImage: "paintbrush")
+                    }
+                    NavigationLink {
+                        PrivacyView()
+                    } label: {
+                        Label("Privacy", systemImage: "hand.raised")
+                    }
                 }
 
                 Section("Help & About") {
-                    placeholderRow("Help & Support", systemImage: "questionmark.circle")
-                    placeholderRow("About", systemImage: "info.circle")
+                    Label("Help & Support", systemImage: "questionmark.circle")
+                    Label("About", systemImage: "info.circle")
                 }
 
                 Section {
@@ -97,14 +113,4 @@ struct ProfileView: View {
         }
     }
 
-    private func placeholderRow(_ title: String, systemImage: String) -> some View {
-        HStack {
-            Label(title, systemImage: systemImage)
-                .foregroundStyle(.primary)
-            Spacer()
-            Text("Coming soon")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-        }
-    }
 }

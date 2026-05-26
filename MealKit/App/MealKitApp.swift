@@ -11,9 +11,23 @@ import SwiftData
 /// the commented block in `appModelContainer` below.
 @main
 struct MealKitApp: App {
+    // Mirror the appearance key so MealKitApp can apply the color scheme
+    // without owning the full UserPreferencesStore.
+    @AppStorage("com.abhishekbiju.mealkit.appearancePreference")
+    private var appearanceRaw: String = "system"
+
+    private var preferredColorScheme: ColorScheme? {
+        switch appearanceRaw {
+        case "light": .light
+        case "dark":  .dark
+        default:       nil
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()
+                .preferredColorScheme(preferredColorScheme)
         }
         .modelContainer(appModelContainer)
     }
