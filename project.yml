@@ -60,6 +60,8 @@ targets:
         product: LlamaSwift
       - package: ArgmaxOSS
         product: WhisperKit
+      - target: MealKitShareExtension
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.mealkit
@@ -111,8 +113,44 @@ targets:
         #   - Default
         # aps-environment: development
         #
-        # ── Placeholder to keep the entitlements file non-empty ───────────
+        # ── App Group — shared container with Share Extension ─────────────
+        # Works in simulator without provisioning; requires paid account on device.
+        com.apple.security.application-groups:
+          - group.com.abhishekbiju.mealkit
         com.apple.developer.associated-domains: []
+
+  MealKitShareExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: MealKitShareExtension
+      # Also include PendingImportStore from the main app sources so the
+      # extension can write to the shared queue without duplicating code.
+      - path: MealKit/Services/PendingImportStore.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.mealkit.shareextension
+        INFOPLIST_FILE: MealKitShareExtension/Info.plist
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+    entitlements:
+      path: MealKitShareExtension/MealKitShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.abhishekbiju.mealkit
+    info:
+      path: MealKitShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: MealKit
+        NSExtension:
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsMovieWithMaxCount: 1
+              NSExtensionActivationSupportsFileWithMaxCount: 1
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
 
   MealKitTests:
     type: bundle.unit-test
@@ -133,6 +171,7 @@ schemes:
     build:
       targets:
         MealKit: all
+        MealKitShareExtension: all
         MealKitTests: [test]
     run:
       config: Debug
