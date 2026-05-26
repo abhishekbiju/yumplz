@@ -47,7 +47,8 @@ final class CookModeTimer {
     }
 
     private func startTicking() {
-        tickTask = Task { [weak self] in
+        tickTask?.cancel()
+        tickTask = Task { @MainActor [weak self] in
             guard let self else { return }
             while self.remainingSeconds > 0 {
                 do {
@@ -58,6 +59,7 @@ final class CookModeTimer {
                 guard !Task.isCancelled else { return }
                 self.remainingSeconds -= 1
             }
+            guard !Task.isCancelled else { return }
             self.state = .finished
             self.fireHaptic()
             await self.scheduleNotification()

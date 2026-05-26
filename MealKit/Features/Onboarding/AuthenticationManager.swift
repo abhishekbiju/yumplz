@@ -156,7 +156,12 @@ final class AuthenticationManager {
         do {
             try modelContext.save()
         } catch {
-            assertionFailure("Failed to persist new User: \(error)")
+            // Avoid crashing in DEBUG when SwiftData save fails intermittently
+            // (e.g. transient store/schema issues while iterating). Keep the app
+            // on the auth screen so the user can retry instead of hard-crashing.
+            print("⚠️ Failed to persist new User: \(error)")
+            UserDefaults.standard.removeObject(forKey: Self.activeUserIDKey)
+            state = .unauthenticated
             return
         }
 

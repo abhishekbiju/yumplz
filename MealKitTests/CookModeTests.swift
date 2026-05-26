@@ -2,20 +2,6 @@ import XCTest
 import SwiftData
 @testable import MealKit
 
-// MARK: - In-memory container helper
-
-@MainActor
-private func makeContainer() throws -> ModelContainer {
-    let schema = Schema([
-        User.self, Recipe.self, Ingredient.self, Step.self,
-        RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-    ])
-    return try ModelContainer(
-        for: schema,
-        configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
-    )
-}
-
 // MARK: - CookMode Tests
 
 final class CookModeTests: XCTestCase {
@@ -24,7 +10,7 @@ final class CookModeTests: XCTestCase {
 
     @MainActor
     func testCookableStepsFiltersSectionHeaders() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Filter Test")
@@ -47,7 +33,7 @@ final class CookModeTests: XCTestCase {
 
     @MainActor
     func testGoNextAdvancesAndClampsAtLast() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Nav Test")
@@ -74,7 +60,7 @@ final class CookModeTests: XCTestCase {
 
     @MainActor
     func testGoPrevDecreasesAndClampsAtFirst() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Nav Test")
@@ -103,7 +89,7 @@ final class CookModeTests: XCTestCase {
 
     @MainActor
     func testProgressFraction() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Progress Test")
@@ -130,7 +116,7 @@ final class CookModeTests: XCTestCase {
 
     @MainActor
     func testFinishCookingIncrementsTimesCooked() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Finish Test")
@@ -195,7 +181,7 @@ final class CookModeTests: XCTestCase {
 
     @MainActor
     func testMiseEnPlaceToggle() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Mise Test")
@@ -225,5 +211,26 @@ final class CookModeTests: XCTestCase {
         XCTAssertEqual(vm.uncheckedItems.count, 2)
         XCTAssertEqual(vm.checkedItems.count, 1)
         XCTAssertEqual(vm.checkedItems.first?.displayText, "2 eggs")
+    }
+
+    // MARK: Slice 9 — invalidateTimers stops background tick tasks
+
+    @MainActor
+    func testInvalidateTimersCancelsActiveTimers() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        let recipe = Recipe(title: "Timer Cleanup")
+        let step = Step(text: "Simmer", orderIndex: 0, timerSeconds: 60)
+        step.recipe = recipe
+        context.insert(recipe)
+        try context.save()
+
+        let vm = CookModeViewModel(recipe: recipe)
+        vm.startTimer(for: step, at: 0)
+        XCTAssertEqual(vm.timers.count, 1)
+
+        vm.invalidateTimers()
+        XCTAssertTrue(vm.timers.isEmpty)
     }
 }

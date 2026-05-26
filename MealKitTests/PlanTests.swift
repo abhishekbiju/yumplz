@@ -2,15 +2,6 @@ import XCTest
 import SwiftData
 @testable import MealKit
 
-@MainActor
-private func makeContainer() throws -> ModelContainer {
-    let schema = Schema([
-        User.self, Recipe.self, Ingredient.self, Step.self,
-        RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-    ])
-    return try ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-}
-
 final class PlanTests: XCTestCase {
 
     // MARK: - Slice 1 — daysInCurrentWeek returns 7 dates starting from currentWeekStart
@@ -49,7 +40,7 @@ final class PlanTests: XCTestCase {
 
     @MainActor
     func testRecipeBackedMealPersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
 
         let recipe = Recipe(title: "Grilled Salmon")
@@ -70,7 +61,7 @@ final class PlanTests: XCTestCase {
 
     @MainActor
     func testNoteOnlyMealPersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
 
         let meal = PlannedMeal(date: Date(), slot: .lunch, noteText: "Leftovers")
@@ -88,7 +79,7 @@ final class PlanTests: XCTestCase {
 
     @MainActor
     func testMarkAsCooked() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
 
         let recipe = Recipe(title: "Pasta")

@@ -31,18 +31,40 @@ private let appSchema: [any PersistentModel.Type] = [
     GroceryItem.self,
 ]
 
+/// True when Xcode launched this binary as a unit-test host (`TEST_HOST`).
+private var isRunningUnderXCTest: Bool {
+    ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+}
+
 @MainActor
 private let appModelContainer: ModelContainer = {
     let schema = Schema(appSchema)
 
-    // Local-only configuration. Sufficient for development before CloudKit
-    // provisioning. The container is created in-memory if disk init fails so
-    // the app still launches (useful in preview / sim with stale stores).
+    // Unit tests inject into the MealKit process. Never touch the on-disk
+    // store in that mode — XCTest relaunches the host between classes and a
+    // locked/corrupt SQLite file surfaces as immediate EXC_BREAKPOINT traps.
+    if isRunningUnderXCTest {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        do {
+            return try ModelContainer(for: schema, configurations: [config])
+        } catch {
+            fatalError("Failed to init in-memory ModelContainer for tests: \(error)")
+        }
+    }
+
     let config = ModelConfiguration(
         "MealKit",
         schema: schema,
         isStoredInMemoryOnly: false
     )
+
+    func deleteStoreFiles() {
+        let storeURL = config.url
+        let fm = FileManager.default
+        try? fm.removeItem(at: storeURL)
+        try? fm.removeItem(atPath: storeURL.path + "-wal")
+        try? fm.removeItem(atPath: storeURL.path + "-shm")
+    }
 
     // ── CloudKit-enabled configuration (uncomment once provisioned) ──
     // let config = ModelConfiguration(
@@ -54,17 +76,19 @@ private let appModelContainer: ModelContainer = {
     do {
         return try ModelContainer(for: schema, configurations: [config])
     } catch {
-        // Use `print` rather than `assertionFailure` so Debug builds don't abort
-        // before the in-memory fallback can run. This path is most common during
-        // schema iteration when the on-disk store is stale.
         print("⚠️ Failed to init persistent ModelContainer: \(error)")
-        print("⚠️ Falling back to in-memory store; user data will not persist across launches.")
-        let fallback = ModelConfiguration(isStoredInMemoryOnly: true)
+        print("⚠️ Deleting local store and retrying once…")
+        deleteStoreFiles()
         do {
-            return try ModelContainer(for: schema, configurations: [fallback])
+            return try ModelContainer(for: schema, configurations: [config])
         } catch {
-            // If even in-memory init fails, there's nothing useful we can do.
-            fatalError("Failed to init in-memory ModelContainer: \(error)")
+            print("⚠️ Retry failed; falling back to in-memory store. User data will not persist across launches.")
+            let fallback = ModelConfiguration(isStoredInMemoryOnly: true)
+            do {
+                return try ModelContainer(for: schema, configurations: [fallback])
+            } catch {
+                fatalError("Failed to init in-memory ModelContainer: \(error)")
+            }
         }
     }
 }()

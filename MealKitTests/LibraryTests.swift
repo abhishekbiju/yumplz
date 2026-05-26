@@ -4,15 +4,6 @@ import SwiftData
 
 final class LibraryTests: XCTestCase {
 
-    @MainActor
-    private func makeContainer() throws -> ModelContainer {
-        let schema = Schema([
-            User.self, Recipe.self, Ingredient.self, Step.self,
-            RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-        ])
-        return try ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-    }
-
     // MARK: - Slice 1: SystemCollection.favorites
 
     @MainActor
@@ -73,7 +64,7 @@ final class LibraryTests: XCTestCase {
 
     @MainActor
     func testFavoriteTogglePersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Toggle Test")
@@ -91,7 +82,7 @@ final class LibraryTests: XCTestCase {
 
     @MainActor
     func testAddRecipeToCollectionPersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Weeknight Pasta")
@@ -108,7 +99,7 @@ final class LibraryTests: XCTestCase {
 
     @MainActor
     func testDeleteCollectionDoesNotDeleteRecipe() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context = container.mainContext
 
         let recipe = Recipe(title: "Survivor Recipe")

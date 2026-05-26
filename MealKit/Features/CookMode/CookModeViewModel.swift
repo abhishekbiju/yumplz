@@ -65,4 +65,13 @@ final class CookModeViewModel {
         timer.cancel()
         timers.removeAll { $0 === timer }
     }
+
+    /// Stops every active countdown. Call when Cook Mode is dismissed so timer
+    /// tasks cannot keep mutating this view model after the UI is gone.
+    func invalidateTimers() {
+        for timer in timers {
+            timer.cancel()
+        }
+        timers.removeAll()
+    }
 }

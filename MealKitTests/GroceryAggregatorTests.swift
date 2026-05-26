@@ -2,24 +2,9 @@ import XCTest
 import SwiftData
 @testable import MealKit
 
-@MainActor
-private func makeContainer() throws -> ModelContainer {
-    let schema = Schema([
-        User.self, Recipe.self, Ingredient.self, Step.self,
-        RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-    ])
-    return try ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-}
-
 final class GroceryAggregatorTests: XCTestCase {
 
     // MARK: - Helpers
-
-    @MainActor
-    private func setup() throws -> (ModelContainer, ModelContext) {
-        let c = try makeContainer()
-        return (c, c.mainContext)
-    }
 
     @MainActor
     private func insertRecipe(title: String, servings: Int = 4, in ctx: ModelContext) -> Recipe {
@@ -64,7 +49,8 @@ final class GroceryAggregatorTests: XCTestCase {
 
     @MainActor
     func testSameIngredientSumsQuantities() throws {
-        let (_, ctx) = try setup()
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
 
         let r1 = insertRecipe(title: "R1", servings: 4, in: ctx)
         addIngredient(to: r1, name: "flour", quantity: 500, unit: .g, in: ctx)
@@ -80,6 +66,7 @@ final class GroceryAggregatorTests: XCTestCase {
             (meal: meal1, recipe: r1),
             (meal: meal2, recipe: r2),
         ])
+        _ = container  // keep container alive
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result.first?.name, "flour")
         XCTAssertEqual(result.first?.quantity, 700)
@@ -90,7 +77,8 @@ final class GroceryAggregatorTests: XCTestCase {
 
     @MainActor
     func testScalingByPlannedServings() throws {
-        let (_, ctx) = try setup()
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
 
         let r = insertRecipe(title: "Cake", servings: 4, in: ctx)
         addIngredient(to: r, name: "butter", quantity: 100, unit: .g, in: ctx)
@@ -98,6 +86,7 @@ final class GroceryAggregatorTests: XCTestCase {
         try ctx.save()
 
         let result = GroceryAggregator.aggregate(meals: [(meal: meal, recipe: r)])
+        _ = container
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result.first?.name, "butter")
         XCTAssertEqual(result.first?.quantity, 50)
@@ -109,7 +98,9 @@ final class GroceryAggregatorTests: XCTestCase {
     @MainActor
     func testSameUnitGroupsDifferentUnitsStaySeparate() throws {
         // Part A: same unit → 1 row
-        let (_, ctxA) = try setup()
+        let containerA = try TestModelContainer.make()
+        let ctxA = containerA.mainContext
+
         let rA1 = insertRecipe(title: "A1", servings: 1, in: ctxA)
         addIngredient(to: rA1, name: "milk", quantity: 200, unit: .ml, in: ctxA)
         let mealA1 = makeMeal(recipe: rA1, plannedServings: 1, in: ctxA)
@@ -123,12 +114,15 @@ final class GroceryAggregatorTests: XCTestCase {
             (meal: mealA1, recipe: rA1),
             (meal: mealA2, recipe: rA2),
         ])
+        _ = containerA
         let milkA = resultA.filter { $0.name == "milk" }
         XCTAssertEqual(milkA.count, 1)
         XCTAssertEqual(milkA.first?.quantity, 500)
 
         // Part B: different units → 2 rows
-        let (_, ctxB) = try setup()
+        let containerB = try TestModelContainer.make()
+        let ctxB = containerB.mainContext
+
         let rB1 = insertRecipe(title: "B1", servings: 1, in: ctxB)
         addIngredient(to: rB1, name: "milk", quantity: 200, unit: .ml, in: ctxB)
         let mealB1 = makeMeal(recipe: rB1, plannedServings: 1, in: ctxB)
@@ -142,6 +136,7 @@ final class GroceryAggregatorTests: XCTestCase {
             (meal: mealB1, recipe: rB1),
             (meal: mealB2, recipe: rB2),
         ])
+        _ = containerB
         let milkB = resultB.filter { $0.name == "milk" }
         XCTAssertEqual(milkB.count, 2)
     }
@@ -150,13 +145,16 @@ final class GroceryAggregatorTests: XCTestCase {
 
     @MainActor
     func testVibeUnitsGetNilQuantity() throws {
-        let (_, ctx) = try setup()
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
+
         let r = insertRecipe(title: "Soup", servings: 4, in: ctx)
         addIngredient(to: r, name: "salt", quantity: 2, unit: .pinch, in: ctx)
         let meal = makeMeal(recipe: r, plannedServings: 4, in: ctx)
         try ctx.save()
 
         let result = GroceryAggregator.aggregate(meals: [(meal: meal, recipe: r)])
+        _ = container
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result.first?.name, "salt")
         XCTAssertNil(result.first?.quantity)
@@ -167,7 +165,9 @@ final class GroceryAggregatorTests: XCTestCase {
 
     @MainActor
     func testFallbackToOriginalText() throws {
-        let (_, ctx) = try setup()
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
+
         let r = insertRecipe(title: "Garnish", servings: 1, in: ctx)
         let i = Ingredient(originalText: " Fresh Herbs ", orderIndex: 0)
         i.parsedName = nil
@@ -179,6 +179,7 @@ final class GroceryAggregatorTests: XCTestCase {
         try ctx.save()
 
         let result = GroceryAggregator.aggregate(meals: [(meal: meal, recipe: r)])
+        _ = container
         XCTAssertEqual(result.count, 1)
         XCTAssertEqual(result.first?.name, "fresh herbs")
     }
@@ -187,12 +188,15 @@ final class GroceryAggregatorTests: XCTestCase {
 
     @MainActor
     func testNoteOnlyMealsAreSkipped() throws {
-        let (_, ctx) = try setup()
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
+
         let meal = PlannedMeal(date: Date(), slot: .lunch, noteText: "leftovers")
         ctx.insert(meal)
         try ctx.save()
 
         let result = GroceryAggregator.aggregate(meals: [(meal: meal, recipe: nil)])
+        _ = container
         XCTAssertEqual(result.count, 0)
     }
 }

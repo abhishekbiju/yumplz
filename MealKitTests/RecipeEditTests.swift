@@ -9,18 +9,10 @@ import SwiftData
 @MainActor
 final class RecipeEditTests: XCTestCase {
 
-    private func makeContainer() throws -> ModelContainer {
-        let schema = Schema([
-            User.self, Recipe.self, Ingredient.self, Step.self,
-            RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-        ])
-        return try ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-    }
-
     // MARK: – Slice 1 · saving a title change persists it
 
     func testSavingTitleChangePersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Old")
@@ -41,7 +33,7 @@ final class RecipeEditTests: XCTestCase {
     // MARK: – Slice 2 · saving a servings change persists it
 
     func testSavingServingsChangePersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Test")
@@ -62,7 +54,7 @@ final class RecipeEditTests: XCTestCase {
     // MARK: – Slice 3 · adding an ingredient persists it
 
     func testAddingIngredientPersists() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Test")
@@ -84,7 +76,7 @@ final class RecipeEditTests: XCTestCase {
     // MARK: – Slice 4 · deleting an ingredient cascade-deletes, leaving no orphan
 
     func testDeletingIngredientLeavesNoOrphan() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Test")

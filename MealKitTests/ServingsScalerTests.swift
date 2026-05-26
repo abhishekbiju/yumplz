@@ -8,19 +8,10 @@ final class ServingsScalerTests: XCTestCase {
 
     private let scaler = ServingsScaler()
 
-    // Shared in-memory SwiftData container so `@Model` objects behave correctly.
-    private func makeContainer() throws -> ModelContainer {
-        let schema = Schema([
-            User.self, Recipe.self, Ingredient.self, Step.self,
-            RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-        ])
-        return try ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-    }
-
     // MARK: – Slice 1 · scaledQuantity scales proportionally
 
     func testScaledQuantityScalesCorrectly() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Bread")
@@ -39,7 +30,7 @@ final class ServingsScalerTests: XCTestCase {
     // MARK: – Slice 2 · scaledQuantity returns nil when parsedQuantity is nil
 
     func testScaledQuantityReturnsNilWhenNoParsedQuantity() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let ingredient = Ingredient(originalText: "salt to taste")
@@ -52,7 +43,7 @@ final class ServingsScalerTests: XCTestCase {
     // MARK: – Slice 3 · displayText falls back to originalText when no structured parse
 
     func testDisplayTextFallsBackToOriginalTextWhenNoStructuredParse() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let ingredient = Ingredient(originalText: "a handful of breadcrumbs")
@@ -66,7 +57,7 @@ final class ServingsScalerTests: XCTestCase {
     // MARK: – Slice 4 · displayText formats ½ as a vulgar fraction
 
     func testDisplayTextFormatsCommonFractions() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Cake")
@@ -88,7 +79,7 @@ final class ServingsScalerTests: XCTestCase {
     // MARK: – Slice 5 · displayText omits quantity for vibe units
 
     func testDisplayTextOmitsQuantityForVibeUnits() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Soup")
@@ -109,7 +100,7 @@ final class ServingsScalerTests: XCTestCase {
     // MARK: – Slice 6 · displayText uses parsedCustomUnit when no canonical unit
 
     func testDisplayTextUsesCustomUnitWhenPresent() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Pasta")
@@ -131,7 +122,7 @@ final class ServingsScalerTests: XCTestCase {
     // MARK: – Slice 7 · displayText rounds large quantities to 1 decimal place
 
     func testDisplayTextRoundsLargeQuantitiesToOneDecimal() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let context   = container.mainContext
 
         let recipe = Recipe(title: "Stew")

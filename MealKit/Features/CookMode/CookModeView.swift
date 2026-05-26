@@ -60,6 +60,7 @@ struct CookModeView: View {
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
+            viewModel.invalidateTimers()
         }
         .navigationBarTitleDisplayMode(.inline)
     }

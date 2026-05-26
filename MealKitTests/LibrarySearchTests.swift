@@ -2,22 +2,13 @@ import XCTest
 import SwiftData
 @testable import MealKit
 
-@MainActor
-private func makeContainer() throws -> ModelContainer {
-    let schema = Schema([
-        User.self, Recipe.self, Ingredient.self, Step.self,
-        RecipeCollection.self, PlannedMeal.self, GroceryList.self, GroceryItem.self,
-    ])
-    return try ModelContainer(for: schema, configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
-}
-
 final class LibrarySearchTests: XCTestCase {
 
     // MARK: - Slice 1 — empty query returns all
 
     @MainActor
     func testEmptyQueryReturnsAll() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
         let r1 = Recipe(title: "Pasta"); ctx.insert(r1)
         let r2 = Recipe(title: "Soup"); ctx.insert(r2)
@@ -31,7 +22,7 @@ final class LibrarySearchTests: XCTestCase {
 
     @MainActor
     func testQueryFiltersByTitle() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
         let pasta = Recipe(title: "Pasta Carbonara"); ctx.insert(pasta)
         let soup = Recipe(title: "Tomato Soup"); ctx.insert(soup)
@@ -48,7 +39,7 @@ final class LibrarySearchTests: XCTestCase {
 
     @MainActor
     func testQueryMatchesCuisine() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
         let pizza = Recipe(title: "Pizza"); pizza.cuisine = "Italian"; ctx.insert(pizza)
         let tacos = Recipe(title: "Tacos"); tacos.cuisine = "Mexican"; ctx.insert(tacos)
@@ -65,7 +56,7 @@ final class LibrarySearchTests: XCTestCase {
 
     @MainActor
     func testDietaryTagFilterRequiresAll() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
         let r1 = Recipe(title: "Vegan Salad")
         r1.dietaryTags = ["Vegan", "Gluten-Free"]
@@ -86,7 +77,7 @@ final class LibrarySearchTests: XCTestCase {
 
     @MainActor
     func testMaxCookTimeFilters() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
         let quick = Recipe(title: "Quick Oats")
         quick.cookTimeSeconds = 5 * 60
@@ -107,7 +98,7 @@ final class LibrarySearchTests: XCTestCase {
 
     @MainActor
     func testCombinedFiltersAreAnd() throws {
-        let container = try makeContainer()
+        let container = try TestModelContainer.make()
         let ctx = container.mainContext
         let r1 = Recipe(title: "Fast Vegan Bowl")
         r1.cuisine = "Asian"; r1.dietaryTags = ["Vegan"]; r1.cookTimeSeconds = 15 * 60
