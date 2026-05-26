@@ -3,14 +3,16 @@ import SwiftUI
 // MARK: - Color tokens
 
 extension Color {
-    /// Warm cream that underpins every background in the app.
-    static let mkBackground = Color(red: 1.0, green: 0.97, blue: 0.93)
-    /// Subtle warm tint used behind glass cards.
-    static let mkSurface = Color(red: 1.0, green: 0.94, blue: 0.87)
-    /// Sage green for secondary accents (dietary tags, "healthy" badges, etc.)
-    static let mkGreen = Color(red: 0.29, green: 0.49, blue: 0.35)
-    /// Warm amber used when we want a softer accent than the main orange.
-    static let mkAmber = Color(red: 1.0, green: 0.76, blue: 0.27)
+    /// Light lavender that underpins every background in the app.
+    static let mkBackground = Color(red: 0.97, green: 0.96, blue: 1.00)
+    /// Deeper lavender used behind glass cards.
+    static let mkSurface = Color(red: 0.93, green: 0.91, blue: 0.99)
+    /// Teal-green for secondary accents (dietary tags, "healthy" badges, etc.)
+    static let mkGreen = Color(red: 0.25, green: 0.42, blue: 0.42)
+    /// Medium purple secondary accent.
+    static let mkPurple = Color(red: 0.48, green: 0.36, blue: 0.66)
+    /// Soft lilac for tags, chips, and subtle highlights.
+    static let mkLilac = Color(red: 0.72, green: 0.61, blue: 0.90)
 }
 
 // MARK: - Glass card modifier
@@ -39,9 +41,9 @@ extension View {
     }
 }
 
-// MARK: - Warm gradient background
+// MARK: - Glass gradient background
 
-/// Full-screen warm gradient with two blurred accent blobs — the backdrop
+/// Full-screen purple gradient with blurred accent blobs — the backdrop
 /// used behind every top-level view.
 struct WarmGlassBackground: View {
     var body: some View {
@@ -52,26 +54,26 @@ struct WarmGlassBackground: View {
                 endPoint: .bottomTrailing
             )
 
-            // Upper-left orange blob
+            // Medium purple blob top-left
             Circle()
-                .fill(Color.accentColor.opacity(0.28))
-                .frame(width: 280, height: 280)
+                .fill(Color.accentColor.opacity(0.22))
+                .frame(width: 300, height: 300)
+                .blur(radius: 80)
+                .offset(x: -90, y: -130)
+
+            // Lilac blob lower-right
+            Circle()
+                .fill(Color.mkLilac.opacity(0.20))
+                .frame(width: 240, height: 240)
                 .blur(radius: 70)
-                .offset(x: -80, y: -120)
+                .offset(x: 110, y: 280)
 
-            // Lower-right green blob
+            // Soft pink hint centre-right
             Circle()
-                .fill(Color.mkGreen.opacity(0.18))
-                .frame(width: 220, height: 220)
+                .fill(Color(red: 0.85, green: 0.65, blue: 0.90).opacity(0.15))
+                .frame(width: 180, height: 180)
                 .blur(radius: 60)
-                .offset(x: 100, y: 260)
-
-            // Subtle amber hint centre-right
-            Circle()
-                .fill(Color.mkAmber.opacity(0.14))
-                .frame(width: 160, height: 160)
-                .blur(radius: 50)
-                .offset(x: 120, y: -30)
+                .offset(x: 130, y: -40)
         }
         .ignoresSafeArea()
     }

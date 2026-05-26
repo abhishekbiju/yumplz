@@ -356,7 +356,7 @@ private struct StarRatingPicker: View {
                     rating = (rating == star) ? 0 : star
                 } label: {
                     Image(systemName: star <= rating ? "star.fill" : "star")
-                        .foregroundStyle(star <= rating ? Color.mkAmber : Color.secondary)
+                        .foregroundStyle(star <= rating ? Color.mkLilac : Color.secondary)
                         .imageScale(.medium)
                 }
                 .buttonStyle(.plain)

@@ -241,7 +241,7 @@ struct PlanGenerationSheet: View {
             Spacer()
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 48))
-                .foregroundStyle(Color.mkAmber)
+                .foregroundStyle(Color.mkLilac)
             Text("Generation failed")
                 .font(.mkHeading)
             Text(error.localizedDescription)

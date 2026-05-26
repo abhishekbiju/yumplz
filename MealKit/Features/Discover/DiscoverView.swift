@@ -194,10 +194,10 @@ struct HeroCard: View {
 
     private var heroGradient: LinearGradient {
         let palettes: [(Color, Color)] = [
-            (.orange, .mkAmber.opacity(0.7)),
+            (.accentColor, .mkLilac.opacity(0.7)),
             (.mkGreen, .teal),
             (.purple, .blue.opacity(0.7)),
-            (.pink.opacity(0.9), .orange.opacity(0.7)),
+            (.pink.opacity(0.9), .accentColor.opacity(0.7)),
             (.teal, .mkGreen.opacity(0.8)),
         ]
         let idx = abs(recipe.title.hashValue) % palettes.count
@@ -300,9 +300,9 @@ private struct HouseRecipeCard: View {
 
     private var cardGradient: LinearGradient {
         let palettes: [(Color, Color)] = [
-            (.orange.opacity(0.65), .mkAmber.opacity(0.35)),
+            (.accentColor.opacity(0.65), .mkLilac.opacity(0.35)),
             (.mkGreen.opacity(0.60), .teal.opacity(0.30)),
-            (.mkAmber.opacity(0.70), .orange.opacity(0.40)),
+            (.mkLilac.opacity(0.70), .accentColor.opacity(0.40)),
             (.purple.opacity(0.50), .pink.opacity(0.30)),
             (.teal.opacity(0.55), .blue.opacity(0.30)),
         ]
@@ -415,9 +415,9 @@ private struct DiscoverGridCell: View {
 
     private var cellGradient: LinearGradient {
         let palettes: [(Color, Color)] = [
-            (.orange.opacity(0.65), .mkAmber.opacity(0.35)),
+            (.accentColor.opacity(0.65), .mkLilac.opacity(0.35)),
             (.mkGreen.opacity(0.60), .teal.opacity(0.30)),
-            (.mkAmber.opacity(0.70), .orange.opacity(0.40)),
+            (.mkLilac.opacity(0.70), .accentColor.opacity(0.40)),
             (.purple.opacity(0.50), .pink.opacity(0.30)),
             (.teal.opacity(0.55), .blue.opacity(0.30)),
         ]

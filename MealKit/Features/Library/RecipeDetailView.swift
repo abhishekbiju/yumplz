@@ -111,7 +111,7 @@ struct RecipeDetailView: View {
         } else {
             ZStack {
                 LinearGradient(
-                    colors: [.orange.opacity(0.5), .mkAmber.opacity(0.3)],
+                    colors: [.accentColor.opacity(0.5), .mkLilac.opacity(0.3)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -310,7 +310,7 @@ private struct StepsListView: View {
                             if let secs = row.timerSeconds {
                                 Label(formatTime(secs), systemImage: "timer")
                                     .font(.mkCaption)
-                                    .foregroundStyle(Color.mkAmber)
+                                    .foregroundStyle(Color.mkLilac)
                             }
                         }
                     }
