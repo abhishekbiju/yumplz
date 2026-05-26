@@ -61,8 +61,16 @@ The app is structured around four primary actions: **Import** (get a recipe in),
 ### Import — Paste and Manual
 
 17. As a user, I want to paste raw recipe text and have the app structure it into ingredients and steps, so that I can import from any source that lets me copy text.
-18. As a user, I want to create a recipe entirely by hand, so that I can record original recipes I invented myself.
+18. As a user, I want to create a recipe entirely by hand, so that I can record original recipes I invented myself. *(Implementation: "Manual Entry" in the import sheet creates a blank Recipe and immediately opens it in RecipeEditView — no LLM involved.)*
 19. As a user, I want to add a hero photo to any recipe I enter manually, so that my library looks consistent regardless of how a recipe was added.
+
+### Import — Share Extension
+
+20. As a user watching a cooking video on TikTok, Instagram, or YouTube, I want to tap Share in that app and choose MealKit, so that the video is sent directly to MealKit without me having to copy and paste a URL.
+21. As a user, I want the Share Extension to accept both video files and URLs shared from any app, so that it works across all social platforms regardless of how each app exposes its share sheet.
+22. As a user, I want the Share Extension to show a compact progress indicator while it queues the import, so that I know the item was received and will be processed.
+23. As a user, I want the main MealKit app to open automatically after sharing, so that I can review and save the imported recipe without extra navigation steps.
+24. As a user, I want a pending import badge on the Library tab if I shared something while the app was closed, so that I know there is something waiting for me to review.
 
 ### AI Model Download
 
@@ -137,20 +145,34 @@ The app is structured around four primary actions: **Import** (get a recipe in),
 67. As a user, I want to see previous Grocery Lists archived and still accessible, so that I can reference what I bought for a favourite meal in the past.
 68. As a user, I want edits to a Grocery List (deletions, quantity changes, check-offs) to not affect my recipes or Meal Plan, so that the shopping list is downstream-only and I can freely modify it.
 
-### Discover — Content Library
+### Discover — House Recipes (bundled)
 
-69. As a new user with no imported recipes, I want to see a curated library of recipes from the first launch, so that the app feels useful immediately rather than empty.
-70. As a user, I want to browse the Content Library by cuisine, meal type, and dietary tag, so that I can find relevant recipes for my next meal without already knowing what I want.
-71. As a user, I want to see editorially curated collections ("30-Minute Weeknight Dinners", "Cozy Soups"), so that the app guides my discovery rather than just listing everything alphabetically.
-72. As a user, I want to save any Content Library recipe to my personal Library with a single tap, so that adding a recipe I discovered in Discover is frictionless.
-73. As a user, I want my saved copy to be independent of the Content Library version, so that I can edit the recipe without affecting the original.
-74. As a user, I want new recipes to appear in the Content Library without an app update, so that the app feels alive.
+69. As a new user with no imported recipes, I want to see a curated set of House Recipes from the first launch, so that the app feels useful immediately rather than empty.
+70. As a user, I want to browse House Recipes by cuisine, meal type, and dietary tag, so that I can find relevant recipes without knowing what I want.
+71. As a user, I want to see editorially named sections ("Quick Weeknight Dinners", "Healthy Breakfasts", "Comfort Food"), so that discovery feels like a magazine rather than a flat list.
+72. As a user, I want to save any House Recipe to my personal Library with a single tap, so that adding a discovered recipe is frictionless.
+73. As a user, I want my saved copy to be independent of the original House Recipe, so that I can edit it without affecting what other users see.
+74. As a user, I want the hero card at the top of Discover to spotlight a featured recipe, so that every app launch has a clear suggestion.
+
+*(Implementation note: V1 bundles ~24 House Recipes as JSON in the app bundle, loaded into an in-memory read-only store at launch. CloudKit Public Database serving is deferred to post-developer-program as per ADR 0002.)*
 
 ### Profile and Settings
 
 75. As a user, I want to see my name, email, and the date I joined on my profile screen, so that I can confirm the identity tied to my data.
 76. As a user, I want to sign out of the app on this device without losing any of my data, so that I can lend my phone to someone without exposing my recipes.
 77. As a user, I want a clear explanation that signing out only affects this device, so that I do not worry about accidentally deleting my recipes.
+78. As a user, I want to set my default dietary restrictions in Preferences, so that the Plan Generation sheet pre-fills with my preferences every time without me having to re-select them.
+79. As a user, I want to customise the Store Category order, so that my Grocery List groups match the layout of my usual supermarket.
+80. As a user, I want to enable a daily meal reminder notification at a time I choose, so that the app prompts me to check my planned meals each morning.
+81. As a user, I want to toggle between system, light, and dark appearance, so that the app matches my preference regardless of my system setting.
+82. As a user, I want to export all my recipes as a JSON file from the Privacy section, so that I can take my data with me if I stop using the app.
+83. As a user, I want a "Delete All My Data" option in the Privacy section with a confirmation step, so that I can permanently remove everything I have stored in the app.
+
+### Recipe Sharing Out
+
+84. As a user, I want to share any recipe from my Library via the iOS share sheet as formatted plain text (title, ingredients, steps), so that I can send it to anyone via iMessage, email, or any other app without them needing MealKit installed.
+85. As a user, I want to share a recipe as a styled image card showing the title, hero photo, and key stats, so that I can post it to Instagram Stories or send it as a visual preview.
+86. As a user, I want to share a recipe via a `mealkit://` deep link that opens MealKit on another device and pre-loads the import sheet with that recipe's text, so that a friend with the app can save it with one tap.
 
 ### Paywall and Subscriptions (App Store V1)
 

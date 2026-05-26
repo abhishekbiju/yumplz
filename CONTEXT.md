@@ -209,3 +209,35 @@ bundled static map, then user-overridden (stickily, per ingredient name).
 An entry in a Grocery List that originated from the user typing it in,
 rather than from Aggregation. Flagged as such so it survives a
 merge-regeneration of the list.
+
+## User Preferences
+
+The persistent per-device settings that personalise the app: default
+dietary tags (pre-fill Plan Generation), Store Category display order,
+appearance preference (system / light / dark), and meal reminder
+notification time. Stored in UserDefaults — preferences are per-device
+and are not synced to CloudKit. Distinct from the User entity, which
+holds identity data.
+
+## Share Extension
+
+An iOS app extension that receives items (URLs, video files) shared from
+other apps via the iOS share sheet and queues them as pending imports in
+a shared App Group container. The extension itself is a lightweight
+receiver — it does not run the LLM. The main MealKit app picks up
+pending items on next foreground and runs the full import pipeline.
+
+## House Recipe
+
+A Recipe bundled with the app (V1: as JSON in the app bundle) or later
+served from CloudKit Public Database. Authored by the MealKit team.
+Displayed in the Discover tab. Functionally identical to a user-saved
+Recipe once copied into the personal Library. The user's copy is
+independent — edits on either side do not propagate.
+
+## Pending Import
+
+A URL or video file received by the Share Extension and stored in the
+App Group shared container, awaiting processing by the main app. The
+main app checks for pending imports on every foreground transition and
+drains the queue by running the import pipeline on each item.
