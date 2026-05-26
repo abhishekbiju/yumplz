@@ -33,6 +33,7 @@ struct ImportSheetView: View {
         case modelGate(forSource: ImportSourceKind)
         case working
         case review
+        case instagramGuidance
     }
 
     var body: some View {
@@ -64,12 +65,25 @@ struct ImportSheetView: View {
                     )
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
+
+            case .instagramGuidance:
+                InstagramGuidanceCard {
+                    phase = .sourcePicker
+                    importService.reset()
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
         .animation(.mkGentle, value: phase)
         .onChange(of: importService.phase) { _, newPhase in
             if newPhase == .done { phase = .review }
-            if case .failed = newPhase { phase = .sourcePicker }
+            if case .failed(let msg) = newPhase {
+                if msg.contains("video file") {
+                    phase = .instagramGuidance
+                } else {
+                    phase = .sourcePicker
+                }
+            }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
@@ -286,6 +300,45 @@ private struct SourceTileContent: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
         .glassCard()
+    }
+}
+
+// MARK: - Instagram guidance card
+
+private struct InstagramGuidanceCard: View {
+    var onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Spacer()
+
+            VStack(spacing: 20) {
+                Image(systemName: "video.badge.checkmark")
+                    .font(.system(size: 52, weight: .medium))
+                    .foregroundStyle(Color.accentColor)
+
+                VStack(spacing: 10) {
+                    Text("Share the video file instead")
+                        .font(.mkHeading)
+                        .multilineTextAlignment(.center)
+
+                    Text("Instagram captions can't be read from a link. In Instagram, tap ··· → Save Video, then share the file to MealKit.")
+                        .font(.mkBody)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+            }
+            .padding(28)
+            .glassCard()
+            .padding(.horizontal, 24)
+
+            Button("Got it") { onDismiss() }
+                .buttonStyle(.borderedProminent)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

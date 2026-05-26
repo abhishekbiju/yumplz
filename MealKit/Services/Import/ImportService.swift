@@ -10,6 +10,7 @@ private let log = Logger(subsystem: "com.abhishekbiju.mealkit", category: "Impor
 enum ImportPhase: Equatable, Sendable {
     case idle
     case fetchingURL
+    case extractingSocialContent
     case runningOCR
     case transcribingAudio
     case parsingWithAI
@@ -18,13 +19,14 @@ enum ImportPhase: Equatable, Sendable {
 
     var displayLabel: String {
         switch self {
-        case .idle:                return "Ready"
-        case .fetchingURL:         return "Fetching page…"
-        case .runningOCR:          return "Reading text…"
-        case .transcribingAudio:   return "Transcribing audio…"
-        case .parsingWithAI:       return "Parsing with AI…"
-        case .done:                return "Done"
-        case .failed(let msg):     return "Error: \(msg)"
+        case .idle:                    return "Ready"
+        case .fetchingURL:             return "Fetching page…"
+        case .extractingSocialContent: return "Reading post content…"
+        case .runningOCR:              return "Reading text…"
+        case .transcribingAudio:       return "Transcribing audio…"
+        case .parsingWithAI:           return "Parsing with AI…"
+        case .done:                    return "Done"
+        case .failed(let msg):         return "Error: \(msg)"
         }
     }
 
@@ -103,8 +105,17 @@ final class ImportService {
         let text: String
         switch source {
         case .url(let url):
-            phase = .fetchingURL
-            text = try await fetchRecipeText(from: url)
+            phase = .extractingSocialContent
+            let socialResult = try await SocialURLRouter.route(url: url, whisper: whisper)
+            switch socialResult {
+            case .text(let extracted):
+                text = extracted
+            case .needsVideoFile:
+                throw ImportError.needsVideoFile
+            case .useHTMLScrape:
+                phase = .fetchingURL
+                text = try await fetchRecipeText(from: url)
+            }
 
         case .photo(let data):
             phase = .runningOCR
@@ -270,6 +281,7 @@ enum ImportError: LocalizedError {
     case decodingFailed
     case invalidImage
     case noTextFound
+    case needsVideoFile
 
     var errorDescription: String? {
         switch self {
@@ -281,6 +293,9 @@ enum ImportError: LocalizedError {
             return "The selected image could not be processed."
         case .noTextFound:
             return "No readable text was found in the image."
+        case .needsVideoFile:
+            return "Instagram captions can't be read from a link. " +
+                   "In Instagram, tap ··· → Save Video, then share the video file to MealKit."
         }
     }
 }
