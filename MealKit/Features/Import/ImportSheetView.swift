@@ -14,6 +14,14 @@ struct ImportSheetView: View {
     var downloads: ModelDownloadManager
     var importService: ImportService
 
+    /// Called with the newly-created blank Recipe when the user chooses Manual Entry.
+    /// The parent (LibraryView) uses this to navigate directly to RecipeDetailView.
+    var onManualEntry: (Recipe) -> Void = { _ in }
+
+    /// Pre-filled paste text injected via deep-link. When non-nil the source picker
+    /// opens directly on the paste entry step.
+    var initialPasteText: String? = nil
+
     @State private var selectedSource: ImportSourceKind?
     @State private var urlText = ""
     @State private var pastedText = ""
@@ -33,7 +41,7 @@ struct ImportSheetView: View {
 
             switch phase {
             case .sourcePicker:
-                SourcePickerView(onSelect: handleSourceSelected)
+                SourcePickerView(onSelect: handleSourceSelected, initialPasteText: initialPasteText)
                     .transition(.opacity.combined(with: .move(edge: .leading)))
 
             case .modelGate(let source):
@@ -70,12 +78,30 @@ struct ImportSheetView: View {
     // MARK: Private
 
     private func handleSourceSelected(_ kind: ImportSourceKind) {
+        if kind == .manual {
+            createManualEntry()
+            return
+        }
         selectedSource = kind
         let llmReady = downloads.state(for: .llama3_2_3b).isReady
         phase = llmReady ? .working : .modelGate(forSource: kind)
         if llmReady {
             // Source picker already captured user input — start immediately.
         }
+    }
+
+    /// Creates a blank manual-entry Recipe, persists it, dismisses the sheet,
+    /// and fires `onManualEntry` so the parent can navigate to RecipeDetailView.
+    private func createManualEntry() {
+        let recipe = Recipe(title: "")
+        recipe.sourceKind = .manual
+        recipe.needsReview = true
+        recipe.importedAt = Date()
+        modelContext.insert(recipe)
+        try? modelContext.save()
+        let created = recipe
+        dismiss()
+        onManualEntry(created)
     }
 
     private func runImport(source: ImportSourceKind) async {
@@ -93,7 +119,7 @@ struct ImportSheetView: View {
             guard let url = URL(string: urlText.trimmingCharacters(in: .whitespacesAndNewlines)) else { return }
             importSource = .videoURL(url)
         case .manual:
-            // Manual entry bypasses LLM — not handled here.
+            // Manual entry now handled in handleSourceSelected via createManualEntry().
             return
         }
         await importService.startImport(from: importSource)
@@ -119,13 +145,21 @@ enum ImportSourceKind: Equatable {
 
 private struct SourcePickerView: View {
     var onSelect: (ImportSourceKind) -> Void
+    var initialPasteText: String? = nil
 
     @State private var urlText = ""
-    @State private var pastedText = ""
+    @State private var pastedText: String
     @State private var pickerItem: PhotosPickerItem?
-    @State private var step: PickerStep = .chooser
+    @State private var step: PickerStep
 
     enum PickerStep { case chooser, urlEntry, pasteEntry }
+
+    init(onSelect: @escaping (ImportSourceKind) -> Void, initialPasteText: String? = nil) {
+        self.onSelect = onSelect
+        self.initialPasteText = initialPasteText
+        _pastedText = State(initialValue: initialPasteText ?? "")
+        _step = State(initialValue: initialPasteText != nil ? .pasteEntry : .chooser)
+    }
 
     var body: some View {
         NavigationStack {

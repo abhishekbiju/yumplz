@@ -1,6 +1,14 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Deep link notification
+
+extension Notification.Name {
+    /// Posted when the app is opened via a `mealkit://import?text=…` URL.
+    /// The `object` is the percent-decoded text `String`.
+    static let mealKitImportDeepLink = Notification.Name("com.abhishekbiju.mealkit.importDeepLink")
+}
+
 /// Authentication switchboard. Per ADR 0003, the app is gated by Sign in with
 /// Apple — there is no anonymous mode. This view decides which surface to
 /// show based on `AuthenticationManager.state`:
@@ -42,6 +50,19 @@ struct RootView: View {
                 await manager.restoreSession()
             }
         }
+        .onOpenURL { url in
+            handleDeepLink(url)
+        }
+    }
+
+    // MARK: - Deep link handling
+
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme == "mealkit", url.host == "import" else { return }
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let text = components.queryItems?.first(where: { $0.name == "text" })?.value,
+              !text.isEmpty else { return }
+        NotificationCenter.default.post(name: .mealKitImportDeepLink, object: text)
     }
 }
 

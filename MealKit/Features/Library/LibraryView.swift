@@ -16,11 +16,14 @@ struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var searchVM = LibrarySearchViewModel()
+    @State private var navigationPath = NavigationPath()
     @State private var showingImportSheet = false
+    @State private var pendingManualRecipe: Recipe? = nil
     @State private var showingNewCollectionAlert = false
     @State private var newCollectionName = ""
     @State private var collectionToRename: RecipeCollection?
     @State private var renameText = ""
+    @State private var deepLinkPasteText: String? = nil
 
     var downloads: ModelDownloadManager
     var importService: ImportService
@@ -45,7 +48,7 @@ struct LibraryView: View {
 
     var body: some View {
         @Bindable var bvm = searchVM
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 WarmGlassBackground()
 
@@ -100,7 +103,29 @@ struct LibraryView: View {
         }
         .searchable(text: $bvm.query, prompt: "Search recipes, cuisines, tags…")
         .sheet(isPresented: $showingImportSheet) {
-            ImportSheetView(downloads: downloads, importService: importService)
+            ImportSheetView(
+                downloads: downloads,
+                importService: importService,
+                onManualEntry: { recipe in
+                    pendingManualRecipe = recipe
+                },
+                initialPasteText: deepLinkPasteText
+            )
+        }
+        .onChange(of: showingImportSheet) { _, isShowing in
+            // Deep-link paste text is consumed once the sheet opens.
+            if isShowing { deepLinkPasteText = nil }
+            // Navigate to the manually-created recipe once the sheet fully dismisses.
+            if !isShowing, let recipe = pendingManualRecipe {
+                navigationPath.append(recipe)
+                pendingManualRecipe = nil
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .mealKitImportDeepLink)) { note in
+            if let text = note.object as? String {
+                deepLinkPasteText = text
+                showingImportSheet = true
+            }
         }
         .alert("New Collection", isPresented: $showingNewCollectionAlert) {
             TextField("Collection name", text: $newCollectionName)

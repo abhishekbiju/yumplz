@@ -9,6 +9,8 @@ struct RecipeDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingAddToCollection = false
     @State private var showingCookMode = false
+    @State private var showingShareSheet = false
+    @State private var shareItems: [Any] = []
 
     var body: some View {
         ZStack {
@@ -55,6 +57,13 @@ struct RecipeDetailView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 16) {
                     Button {
+                        shareItems = buildShareItems()
+                        showingShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share recipe")
+                    Button {
                         showingAddToCollection = true
                     } label: {
                         Image(systemName: "folder.badge.plus")
@@ -72,6 +81,9 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showingAddToCollection) {
             AddToCollectionSheet(recipe: recipe)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ActivitySheet(items: shareItems)
         }
         .fullScreenCover(isPresented: $showingCookMode) {
             NavigationStack {
@@ -237,6 +249,28 @@ struct RecipeDetailView: View {
             return m > 0 ? "\(h)h \(m)m" : "\(h)h"
         }
     }
+
+    // MARK: - Share
+
+    @MainActor
+    private func buildShareItems() -> [Any] {
+        let text = RecipeShareFormatter.plainText(for: recipe)
+
+        let renderer = ImageRenderer(
+            content: RecipeShareCardView(recipe: recipe)
+                .frame(width: 600, height: 800)
+        )
+        renderer.scale = 2.0
+
+        var items: [Any] = [text]
+        if let image = renderer.uiImage {
+            items.append(image)
+        }
+        if let url = RecipeShareFormatter.deepLinkURL(for: text) {
+            items.append(url)
+        }
+        return items
+    }
 }
 
 // MARK: - Steps List View
@@ -296,6 +330,21 @@ private struct StepsListView: View {
         let m = (seconds % 3600) / 60
         return m > 0 ? "\(h)h \(m)m" : "\(h)h"
     }
+}
+
+// MARK: - Activity Sheet (Share)
+
+import UIKit
+
+@MainActor
+struct ActivitySheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Add to Collection Sheet
