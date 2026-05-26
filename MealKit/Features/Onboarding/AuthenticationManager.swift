@@ -46,6 +46,7 @@ final class AuthenticationManager {
         if let existing = fetchUser(forAppleUserID: devID) {
             UserDefaults.standard.set(devID, forKey: Self.activeUserIDKey)
             state = .authenticated(existing)
+            DebugSeeder.seedIfNeeded(into: modelContext)
             return
         }
         let user = User(appleUserID: devID, displayName: "Dev User", email: nil)
@@ -53,6 +54,7 @@ final class AuthenticationManager {
         try? modelContext.save()
         UserDefaults.standard.set(devID, forKey: Self.activeUserIDKey)
         state = .authenticated(user)
+        DebugSeeder.seedIfNeeded(into: modelContext)
     }
 #endif
 
