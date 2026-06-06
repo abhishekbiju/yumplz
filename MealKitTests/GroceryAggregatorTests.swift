@@ -198,5 +198,5 @@ final class GroceryAggregatorTests: XCTestCase {
         let result = GroceryAggregator.aggregate(meals: [(meal: meal, recipe: nil)])
         _ = container
         XCTAssertEqual(result.count, 0)
-    }
+    } 
 }

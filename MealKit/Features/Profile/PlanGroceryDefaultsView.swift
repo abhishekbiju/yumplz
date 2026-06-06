@@ -5,27 +5,31 @@ struct PlanGroceryDefaultsView: View {
 
     var body: some View {
         @Bindable var prefs = prefs
-        List {
-            Section {
-                ForEach(prefs.storeCategoryOrder) { category in
-                    Text(category.displayName)
+        PurpleScreenContainer {
+            List {
+                Section {
+                    ForEach(prefs.storeCategoryOrder) { category in
+                        Text(category.displayName)
+                    }
+                    .onMove { from, to in
+                        prefs.storeCategoryOrder.move(fromOffsets: from, toOffset: to)
+                    }
+                } footer: {
+                    Text("Drag to reorder how categories appear in your grocery list.")
                 }
-                .onMove { from, to in
-                    prefs.storeCategoryOrder.move(fromOffsets: from, toOffset: to)
-                }
-            } footer: {
-                Text("Drag to reorder how categories appear in your grocery list.")
-            }
 
-            Section {
-                Button("Reset to default") {
-                    prefs.storeCategoryOrder = StoreCategory.defaultOrder
+                Section {
+                    Button("Reset to default") {
+                        prefs.storeCategoryOrder = StoreCategory.defaultOrder
+                    }
+                    .foregroundStyle(.tint)
                 }
-                .foregroundStyle(.tint)
             }
+            .mkInsetListStyle()
         }
         .navigationTitle("Store Category Order")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 EditButton()

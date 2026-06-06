@@ -30,3 +30,13 @@ Pods/
 *.env.local
 Secrets.swift
 GoogleService-Info.plist
+
+# IDE / agent tooling (not part of the app)
+.cursor/
+
+# Test artifacts
+*.xcresult
+DerivedData/
+
+# Screenshot capture temp output
+.tmp-screenshots/

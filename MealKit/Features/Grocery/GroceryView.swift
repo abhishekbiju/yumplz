@@ -19,6 +19,7 @@ struct GroceryView: View {
 
     @State private var showGenerateSheet = false
     @State private var showArchivedSheet = false
+    @State private var showAddItemSheet = false
     @State private var generateStartDate = Date()
     @State private var generateEndDate: Date = Calendar.current.date(byAdding: .day, value: 6, to: Date()) ?? Date()
     @State private var manualItemName = ""
@@ -37,7 +38,7 @@ struct GroceryView: View {
                     emptyState
                 }
             }
-            .navigationTitle("Grocery")
+            .navigationTitle(activeList?.name ?? "Grocery")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
@@ -48,12 +49,39 @@ struct GroceryView: View {
                         } label: {
                             Image(systemName: "archivebox")
                         }
+                        .accessibilityLabel("Past lists")
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Archive") {
-                            archiveActiveList()
+                        Menu {
+                            Button {
+                                showGenerateSheet = true
+                            } label: {
+                                Label("Regenerate from plan", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            Button(role: .destructive) {
+                                archiveActiveList()
+                            } label: {
+                                Label("Archive list", systemImage: "archivebox")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
                         }
                     }
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if activeList != nil {
+                    Button {
+                        manualItemName = ""
+                        showAddItemSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 22, weight: .semibold))
+                    }
+                    .buttonStyle(GradientFABStyle())
+                    .accessibilityLabel("Add grocery item")
+                    .padding(.trailing, 20)
+                    .padding(.bottom, 24)
                 }
             }
         }
@@ -63,6 +91,11 @@ struct GroceryView: View {
         .sheet(isPresented: $showArchivedSheet) {
             archivedListsSheet
         }
+        .sheet(isPresented: $showAddItemSheet) {
+            if let list = activeList {
+                addItemSheet(list: list)
+            }
+        }
     }
 
     // MARK: - Active list
@@ -71,42 +104,89 @@ struct GroceryView: View {
         let items = list.items ?? []
         let unchecked = items.filter { !$0.isChecked }
         let checked = items.filter { $0.isChecked }
+        let uncheckedCount = unchecked.count
 
-        return List {
-            // Unchecked grouped by category
-            ForEach(prefs.storeCategoryOrder, id: \.self) { cat in
-                let catItems = unchecked.filter { $0.storeCategory == cat }
-                if !catItems.isEmpty {
-                    Section(cat.displayName) {
-                        ForEach(catItems) { item in
-                            GroceryItemRow(item: item)
-                        }
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Summary strip
+                HStack(spacing: 12) {
+                    summaryPill(
+                        value: "\(uncheckedCount)",
+                        label: "to buy",
+                        icon: "cart"
+                    )
+                    summaryPill(
+                        value: "\(checked.count)",
+                        label: "done",
+                        icon: "checkmark.circle"
+                    )
+                }
+                .padding(.horizontal, 16)
+
+                // Unchecked by store category
+                ForEach(prefs.storeCategoryOrder, id: \.self) { cat in
+                    let catItems = unchecked.filter { $0.storeCategory == cat }
+                    if !catItems.isEmpty {
+                        grocerySection(title: cat.displayName, items: catItems)
                     }
                 }
-            }
 
-            // Checked "Done" section
-            if !checked.isEmpty {
-                Section("Done") {
-                    ForEach(checked) { item in
-                        GroceryItemRow(item: item)
-                    }
+                // Items with unknown/other category not in order list
+                let orderedCats = Set(prefs.storeCategoryOrder)
+                let uncategorized = unchecked.filter { !orderedCats.contains($0.storeCategory) }
+                if !uncategorized.isEmpty {
+                    grocerySection(title: "Other", items: uncategorized)
+                }
+
+                if !checked.isEmpty {
+                    grocerySection(title: "Done", items: checked, dimmed: true)
                 }
             }
-
-            // Add manual item row
-            Section {
-                HStack {
-                    Image(systemName: "plus.circle")
-                        .foregroundStyle(Color.accentColor)
-                    TextField("Add item…", text: $manualItemName)
-                        .onSubmit { addManualItem(to: list) }
-                }
-            }
+            .padding(.top, 8)
+            .padding(.bottom, 100)
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .navigationTitle(list.name)
+    }
+
+    private func grocerySection(title: String, items: [GroceryItem], dimmed: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.mkCaption)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .padding(.horizontal, 20)
+
+            VStack(spacing: 0) {
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    GroceryItemRow(item: item)
+                        .opacity(dimmed ? 0.75 : 1)
+                    if index < items.count - 1 {
+                        Divider()
+                            .padding(.leading, 52)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+            .glassCard(cornerRadius: 16)
+            .padding(.horizontal, 16)
+        }
+    }
+
+    private func summaryPill(value: String, label: String, icon: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.accentColor)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.mkHeading)
+                Text(label)
+                    .font(.mkCaption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(14)
+        .glassCard(cornerRadius: 14)
     }
 
     // MARK: - Empty state
@@ -114,17 +194,28 @@ struct GroceryView: View {
     private var emptyState: some View {
         VStack(spacing: 20) {
             Spacer()
-            Image(systemName: "cart")
-                .font(.system(size: 56))
-                .foregroundStyle(.tertiary)
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.12))
+                    .frame(width: 100, height: 100)
+                Image(systemName: "cart")
+                    .font(.system(size: 44, weight: .light))
+                    .foregroundStyle(Color.accentColor)
+            }
             Text("No grocery list")
                 .font(.mkHeading)
-            Text("Generate a list from your meal plan.")
+            Text("Generate a list from your meal plan, then add extras with the + button.")
                 .font(.mkBody)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button("Generate list") {
+                .padding(.horizontal, 32)
+            Button {
                 showGenerateSheet = true
+            } label: {
+                Label("Generate from plan", systemImage: "sparkles")
+                    .font(.body.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
             }
             .buttonStyle(.borderedProminent)
             .tint(.accentColor)
@@ -138,25 +229,77 @@ struct GroceryView: View {
         .padding()
     }
 
+    // MARK: - Add item sheet
+
+    private func addItemSheet(list: GroceryList) -> some View {
+        NavigationStack {
+            ZStack {
+                WarmGlassBackground()
+                VStack(spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Item name")
+                            .font(.mkCaption)
+                            .foregroundStyle(.secondary)
+                        TextField("e.g. Olive oil", text: $manualItemName)
+                            .textFieldStyle(.roundedBorder)
+                            .submitLabel(.done)
+                            .onSubmit { addManualItem(to: list) }
+                    }
+                    .padding(16)
+                    .glassCard()
+
+                    Button {
+                        addManualItem(to: list)
+                        showAddItemSheet = false
+                    } label: {
+                        Label("Add to list", systemImage: "plus.circle.fill")
+                            .font(.body.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 4)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(manualItemName.trimmingCharacters(in: .whitespaces).isEmpty)
+
+                    Spacer()
+                }
+                .padding(20)
+            }
+            .navigationTitle("Add item")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { showAddItemSheet = false }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+
     // MARK: - Generate sheet
 
     private var generateSheet: some View {
         NavigationStack {
-            Form {
-                Section("Date range") {
-                    DatePicker("Start", selection: $generateStartDate, displayedComponents: .date)
-                    DatePicker("End", selection: $generateEndDate, in: generateStartDate..., displayedComponents: .date)
-                }
-                if let error = generateError {
-                    Section {
-                        Text(error)
-                            .foregroundStyle(.red)
-                            .font(.mkCaption)
+            ZStack {
+                WarmGlassBackground()
+                Form {
+                    Section("Date range") {
+                        DatePicker("Start", selection: $generateStartDate, displayedComponents: .date)
+                        DatePicker("End", selection: $generateEndDate, in: generateStartDate..., displayedComponents: .date)
+                    }
+                    if let error = generateError {
+                        Section {
+                            Text(error)
+                                .foregroundStyle(.red)
+                                .font(.mkCaption)
+                        }
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Generate Grocery List")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { showGenerateSheet = false }
@@ -179,18 +322,22 @@ struct GroceryView: View {
 
     private var archivedListsSheet: some View {
         NavigationStack {
-            List(archivedLists) { list in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(list.name)
-                        .font(.mkBody)
-                    Text("\(list.items?.count ?? 0) items")
-                        .font(.mkCaption)
-                        .foregroundStyle(.secondary)
+            ZStack {
+                WarmGlassBackground()
+                List(archivedLists) { list in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(list.name)
+                            .font(.mkBody)
+                        Text("\(list.items?.count ?? 0) items")
+                            .font(.mkCaption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
+                .mkInsetListStyle()
             }
-            .listStyle(.insetGrouped)
             .navigationTitle("Past Lists")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { showArchivedSheet = false }
@@ -276,7 +423,7 @@ private struct GroceryItemRow: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             Button {
                 withAnimation(.mkSnap) {
                     item.isChecked.toggle()
@@ -294,7 +441,7 @@ private struct GroceryItemRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name.capitalized)
-                    .font(.mkBody)
+                    .font(.mkBody.weight(.medium))
                     .strikethrough(item.isChecked)
                     .foregroundStyle(item.isChecked ? .secondary : .primary)
                 if !quantityLabel.isEmpty {
@@ -304,7 +451,7 @@ private struct GroceryItemRow: View {
                 }
             }
 
-            Spacer()
+            Spacer(minLength: 0)
 
             if item.isManual {
                 Text("manual")
@@ -312,6 +459,9 @@ private struct GroceryItemRow: View {
                     .foregroundStyle(.tertiary)
             }
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
     }
 }
 

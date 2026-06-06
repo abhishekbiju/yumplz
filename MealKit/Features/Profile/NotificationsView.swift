@@ -25,7 +25,8 @@ struct NotificationsView: View {
     }
 
     var body: some View {
-        List {
+        PurpleScreenContainer {
+            List {
             Section {
                 Toggle("Daily meal reminder", isOn: Binding(
                     get: { prefs.mealReminderEnabled },
@@ -58,9 +59,12 @@ struct NotificationsView: View {
                     .foregroundStyle(.tint)
                 }
             }
+            }
+            .mkInsetListStyle()
         }
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .task { await checkNotificationStatus() }
     }
 

@@ -7,59 +7,64 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                identitySection
+            PurpleScreenContainer {
+                List {
+                    identitySection
 
-                Section("Subscription") {
-                    HStack {
-                        Label("Free", systemImage: "star.circle")
-                        Spacer()
-                        Text("Trial available")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    Section("Subscription") {
+                        HStack {
+                            Label("Free", systemImage: "star.circle")
+                            Spacer()
+                            Text("Trial available")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Section("Settings") {
+                        NavigationLink {
+                            PreferencesView()
+                        } label: {
+                            Label("Preferences", systemImage: "gear")
+                        }
+                        NavigationLink {
+                            PlanGroceryDefaultsView()
+                        } label: {
+                            Label("Plan & Grocery defaults", systemImage: "calendar.badge.checkmark")
+                        }
+                        NavigationLink {
+                            NotificationsView()
+                        } label: {
+                            Label("Notifications", systemImage: "bell.badge")
+                        }
+                        NavigationLink {
+                            AppearanceView()
+                        } label: {
+                            Label("Appearance", systemImage: "paintbrush")
+                        }
+                        NavigationLink {
+                            PrivacyView()
+                        } label: {
+                            Label("Privacy", systemImage: "hand.raised")
+                        }
+                    }
+
+                    Section("Help & About") {
+                        Label("Help & Support", systemImage: "questionmark.circle")
+                        Label("About", systemImage: "info.circle")
+                    }
+
+                    Section {
+                        Button("Sign Out", role: .destructive) {
+                            showSignOutConfirmation = true
+                        }
                     }
                 }
-
-                Section("Settings") {
-                    NavigationLink {
-                        PreferencesView()
-                    } label: {
-                        Label("Preferences", systemImage: "gear")
-                    }
-                    NavigationLink {
-                        PlanGroceryDefaultsView()
-                    } label: {
-                        Label("Plan & Grocery defaults", systemImage: "calendar.badge.checkmark")
-                    }
-                    NavigationLink {
-                        NotificationsView()
-                    } label: {
-                        Label("Notifications", systemImage: "bell.badge")
-                    }
-                    NavigationLink {
-                        AppearanceView()
-                    } label: {
-                        Label("Appearance", systemImage: "paintbrush")
-                    }
-                    NavigationLink {
-                        PrivacyView()
-                    } label: {
-                        Label("Privacy", systemImage: "hand.raised")
-                    }
-                }
-
-                Section("Help & About") {
-                    Label("Help & Support", systemImage: "questionmark.circle")
-                    Label("About", systemImage: "info.circle")
-                }
-
-                Section {
-                    Button("Sign Out", role: .destructive) {
-                        showSignOutConfirmation = true
-                    }
-                }
+                .mkInsetListStyle()
             }
             .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .confirmationDialog(
                 "Sign out of MealKit?",
                 isPresented: $showSignOutConfirmation,
@@ -112,5 +117,4 @@ struct ProfileView: View {
             }
         }
     }
-
 }

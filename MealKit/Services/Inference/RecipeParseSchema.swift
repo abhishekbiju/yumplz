@@ -17,6 +17,48 @@ struct ParsedRecipeDTO: Codable, Sendable {
     var cuisine: String?
     var dietaryTags: [String]
 
+    init(
+        title: String,
+        summary: String? = nil,
+        servings: Int = 4,
+        prepTimeMinutes: Int? = nil,
+        cookTimeMinutes: Int? = nil,
+        ingredients: [ParsedIngredientDTO] = [],
+        steps: [ParsedStepDTO] = [],
+        nutrition: ParsedNutritionDTO? = nil,
+        tags: [String] = [],
+        cuisine: String? = nil,
+        dietaryTags: [String] = []
+    ) {
+        self.title = title
+        self.summary = summary
+        self.servings = max(1, servings)
+        self.prepTimeMinutes = prepTimeMinutes
+        self.cookTimeMinutes = cookTimeMinutes
+        self.ingredients = ingredients
+        self.steps = steps
+        self.nutrition = nutrition
+        self.tags = tags
+        self.cuisine = cuisine
+        self.dietaryTags = dietaryTags
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        title = try container.decodeIfPresent(String.self, forKey: .title)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? "Imported Recipe"
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+        servings = max(1, try container.decodeIfPresent(Int.self, forKey: .servings) ?? 4)
+        prepTimeMinutes = try container.decodeIfPresent(Int.self, forKey: .prepTimeMinutes)
+        cookTimeMinutes = try container.decodeIfPresent(Int.self, forKey: .cookTimeMinutes)
+        ingredients = try container.decodeIfPresent([ParsedIngredientDTO].self, forKey: .ingredients) ?? []
+        steps = try container.decodeIfPresent([ParsedStepDTO].self, forKey: .steps) ?? []
+        nutrition = try container.decodeIfPresent(ParsedNutritionDTO.self, forKey: .nutrition)
+        tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
+        cuisine = try container.decodeIfPresent(String.self, forKey: .cuisine)
+        dietaryTags = try container.decodeIfPresent([String].self, forKey: .dietaryTags) ?? []
+    }
+
     struct ParsedIngredientDTO: Codable, Sendable {
         var originalText: String
         var quantity: Double?
@@ -24,12 +66,55 @@ struct ParsedRecipeDTO: Codable, Sendable {
         var name: String
         var prep: String?
         var storeCategory: String
+
+        init(
+            originalText: String,
+            quantity: Double? = nil,
+            unit: String? = nil,
+            name: String? = nil,
+            prep: String? = nil,
+            storeCategory: String = "Other"
+        ) {
+            self.originalText = originalText
+            self.quantity = quantity
+            self.unit = unit
+            self.name = name ?? originalText
+            self.prep = prep
+            self.storeCategory = storeCategory
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            originalText = try container.decodeIfPresent(String.self, forKey: .originalText)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            quantity = try container.decodeIfPresent(Double.self, forKey: .quantity)
+            unit = try container.decodeIfPresent(String.self, forKey: .unit)
+            let decodedName = try container.decodeIfPresent(String.self, forKey: .name)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            name = (decodedName?.isEmpty == false) ? decodedName! : originalText
+            prep = try container.decodeIfPresent(String.self, forKey: .prep)
+            storeCategory = try container.decodeIfPresent(String.self, forKey: .storeCategory) ?? "Other"
+        }
     }
 
     struct ParsedStepDTO: Codable, Sendable {
         var text: String
         var timerSeconds: Int?
         var isSectionHeader: Bool
+
+        init(text: String, timerSeconds: Int? = nil, isSectionHeader: Bool = false) {
+            self.text = text
+            self.timerSeconds = timerSeconds
+            self.isSectionHeader = isSectionHeader
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            text = try container.decodeIfPresent(String.self, forKey: .text)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            timerSeconds = try container.decodeIfPresent(Int.self, forKey: .timerSeconds)
+            isSectionHeader = try container.decodeIfPresent(Bool.self, forKey: .isSectionHeader) ?? false
+        }
     }
 
     struct ParsedNutritionDTO: Codable, Sendable {
@@ -37,6 +122,23 @@ struct ParsedRecipeDTO: Codable, Sendable {
         var proteinGrams: Double?
         var carbsGrams: Double?
         var fatGrams: Double?
+    }
+}
+
+// MARK: - Llama chat formatting
+
+/// Llama 3.2 Instruct chat template shared by inference and tests.
+enum LlamaChatFormatting {
+    private static let beginOfText = "<|" + "begin_of_text" + "|>"
+    private static let startHeader = "<|" + "start_header_id" + "|>"
+    private static let endHeader = "<|" + "end_header_id" + "|>"
+    private static let endOfTurn = "<|" + "eot_id" + "|>"
+
+    static func prompt(system: String, user: String) -> String {
+        beginOfText +
+        startHeader + "system" + endHeader + "\n\n" + system + endOfTurn +
+        startHeader + "user" + endHeader + "\n\n" + user + endOfTurn +
+        startHeader + "assistant" + endHeader + "\n\n"
     }
 }
 
@@ -50,60 +152,62 @@ enum RecipePrompts {
     // MARK: Recipe extraction
 
     static let systemPrompt = """
-    You are a precise recipe data extractor. Extract recipe information from \
-    the provided text and return ONLY valid JSON matching the exact schema \
-    provided. Do not add commentary, markdown, or any text outside the JSON \
-    object. If a field cannot be determined, use null. Never invent data.
+    You convert recipe text into JSON. Reply with one JSON object only. \
+    No markdown, no code fences, no commentary before or after the JSON.
     """
 
-    /// Full recipe extraction. `text` is the cleaned body of a recipe page,
-    /// OCR output, transcription, or pasted text.
-    static func recipeExtractionPrompt(from text: String) -> String {
-        let truncated = String(text.prefix(6000))  // stay within 3B context budget
-        return """
-        Extract all recipe information from the text below. Return a single \
-        JSON object matching this schema exactly:
-
-        {
-          "title": "string",
-          "summary": "string or null",
-          "servings": integer,
-          "prepTimeMinutes": integer or null,
-          "cookTimeMinutes": integer or null,
-          "ingredients": [
-            {
-              "originalText": "verbatim ingredient line from source",
-              "quantity": number or null,
-              "unit": "string or null (e.g. cup, tbsp, g, oz, clove)",
-              "name": "core food item only, no prep",
-              "prep": "preparation method or null (e.g. diced, sifted)",
-              "storeCategory": "one of: Produce, Dairy & Eggs, Meat & Seafood, \
-        Pantry, Bakery, Frozen, Beverages, Spices & Baking, Other"
-            }
-          ],
-          "steps": [
-            {
-              "text": "full instruction text",
-              "timerSeconds": integer or null (convert any duration to seconds),
-              "isSectionHeader": boolean (true only for section dividers like \
-        'For the dough' with no actionable instruction)
-            }
-          ],
-          "nutrition": {
-            "calories": integer or null,
-            "proteinGrams": number or null,
-            "carbsGrams": number or null,
-            "fatGrams": number or null
-          },
-          "tags": ["array", "of", "strings"],
-          "cuisine": "string or null",
-          "dietaryTags": ["e.g. vegetarian, vegan, gluten-free, dairy-free"]
+    /// Compact extraction prompt tuned for Llama 3.2 3B — includes a concrete
+    /// example so the model fills every required key.
+    static func sourcePayload(videoTitle: String?, body: String) -> String {
+        var parts: [String] = []
+        if let videoTitle, !videoTitle.isEmpty {
+            parts.append("VIDEO TITLE: \(videoTitle)")
         }
+        parts.append("SOURCE TEXT:\n\(body)")
+        return parts.joined(separator: "\n\n")
+    }
 
-        SOURCE TEXT:
+    static func recipeExtractionPrompt(from text: String) -> String {
+        let truncated = String(text.prefix(4500))
+        return """
+        Extract the recipe below into JSON. Use ONLY ingredients and steps from SOURCE TEXT. \
+        Do not invent ingredients (no pasta unless SOURCE TEXT mentions pasta). \
+        When SOURCE TEXT omits amounts, estimate realistic quantities and units for each ingredient.
+
+        Example (follow this shape exactly):
+        {"title":"Thakkali Rasam","summary":"South Indian tomato rasam","servings":4,"prepTimeMinutes":10,"cookTimeMinutes":15,"ingredients":[{"originalText":"4 ripe tomatoes","quantity":4,"unit":null,"name":"tomatoes","prep":null,"storeCategory":"Produce"},{"originalText":"1 tsp tamarind paste","quantity":1,"unit":"tsp","name":"tamarind paste","prep":null,"storeCategory":"Pantry"},{"originalText":"1/2 tsp cumin seeds","quantity":0.5,"unit":"tsp","name":"cumin seeds","prep":null,"storeCategory":"Spices & Baking"}],"steps":[{"text":"Simmer tomatoes with tamarind and spices.","timerSeconds":900,"isSectionHeader":false},{"text":"Temper mustard seeds and curry leaves; pour over rasam.","timerSeconds":null,"isSectionHeader":false}],"nutrition":null,"tags":["rasam","south indian"],"cuisine":"South Indian","dietaryTags":["Vegetarian","Gluten-Free","Dairy-Free"]}
+
+        Rules:
+        - Output ONLY the JSON object, starting with { and ending with }.
+        - Always include: title, servings, ingredients, steps, tags, dietaryTags.
+        - Every ingredient must have originalText with a quantity (e.g. "4 tomatoes", "1 tsp cumin").
+        - Also fill quantity, unit, and name fields when you can parse them.
+        - Estimate prepTimeMinutes and cookTimeMinutes when not stated; use step timerSeconds as hints.
+        - Infer cuisine from the dish (e.g. rasam → South Indian).
+        - Set dietaryTags from ingredients: Vegetarian/Vegan/Gluten-Free/Dairy-Free when applicable.
+        - Prefer VIDEO TITLE for the dish name when it names the recipe.
+        - Ignore hashtags, @mentions, URLs, and promo lines in steps.
+        - Use null for unknown optional fields; use [] for empty tags/dietaryTags only if none apply.
+        - storeCategory must be one of: Produce, Dairy & Eggs, Meat & Seafood, Pantry, Bakery, Frozen, Beverages, Spices & Baking, Other.
+        - isSectionHeader is false unless the step is only a section heading.
+
         \(truncated)
+        """
+    }
 
-        JSON:
+    /// Ultra-compact fallback when the primary prompt returns unparseable JSON.
+    static func compactRecipeExtractionPrompt(from text: String) -> String {
+        let truncated = String(text.prefix(3500))
+        return """
+        Return ONE JSON object only. Use ONLY ingredients from SOURCE TEXT — do not invent items. \
+        Estimate realistic quantities in originalText when SOURCE TEXT omits them.
+        Keys: title, servings, prepTimeMinutes, cookTimeMinutes, ingredients, steps, tags, dietaryTags, cuisine.
+        ingredients items: originalText, quantity, unit, name, storeCategory (use Other if unsure).
+        steps items: text, isSectionHeader (false). Strip hashtags from step text.
+        Infer cuisine, timing, and dietaryTags (Vegetarian/Vegan/Gluten-Free/Dairy-Free) when possible.
+        Example: {"title":"Thakkali Rasam","servings":4,"prepTimeMinutes":10,"cookTimeMinutes":15,"ingredients":[{"originalText":"4 tomatoes","quantity":4,"name":"tomatoes","storeCategory":"Produce"}],"steps":[{"text":"Simmer tomatoes with spices.","isSectionHeader":false}],"tags":["rasam"],"cuisine":"South Indian","dietaryTags":["Vegetarian"]}
+
+        \(truncated)
         """
     }
 
@@ -163,25 +267,5 @@ enum RecipePrompts {
 
         JSON:
         """
-    }
-}
-
-// MARK: - JSON extraction helpers
-
-extension String {
-    /// Extracts the first JSON object or array from a raw LLM response.
-    /// Models occasionally emit preamble text before the JSON — this trims it.
-    func extractedJSON() -> String? {
-        // Find first '{' or '['
-        let delimiters: [Character] = ["{", "["]
-        guard let start = firstIndex(where: { delimiters.contains($0) }) else {
-            return nil
-        }
-        // Find the matching close bracket by scanning from the end
-        let openChar: Character = self[start]
-        let closeChar: Character = openChar == "{" ? "}" : "]"
-        guard let end = lastIndex(of: closeChar) else { return nil }
-        guard end >= start else { return nil }
-        return String(self[start...end])
     }
 }

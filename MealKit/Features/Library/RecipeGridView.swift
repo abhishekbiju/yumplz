@@ -8,6 +8,8 @@ struct RecipeGridView: View {
     let recipes: [Recipe]
     var title: String = "Recipes"
 
+    @State private var recipePendingDeletion: Recipe?
+
     private let columns = [
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12),
@@ -23,10 +25,28 @@ struct RecipeGridView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(recipes) { recipe in
-                            NavigationLink(value: recipe) {
+                            if recipe.isImportInteractive {
+                                NavigationLink(value: recipe) {
+                                    RecipeCardView(recipe: recipe)
+                                }
+                                .buttonStyle(.plain)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        recipePendingDeletion = recipe
+                                    } label: {
+                                        Label("Delete Recipe", systemImage: "trash")
+                                    }
+                                }
+                            } else {
                                 RecipeCardView(recipe: recipe)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            recipePendingDeletion = recipe
+                                        } label: {
+                                            Label("Remove", systemImage: "trash")
+                                        }
+                                    }
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -40,6 +60,7 @@ struct RecipeGridView: View {
         .navigationDestination(for: Recipe.self) { recipe in
             RecipeDetailView(recipe: recipe)
         }
+        .recipeDeleteConfirmation(recipe: $recipePendingDeletion)
     }
 
     private var emptyState: some View {

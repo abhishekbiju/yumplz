@@ -11,19 +11,57 @@ struct PendingImportItem: Codable, Identifiable, Sendable {
         case url
         /// An absolute path to a video file copied into the shared container.
         case videoFile
+        /// Raw recipe text pasted/shared as plain text.
+        case plainText
     }
 
     let id: String
     let kind: Kind
     /// For `.url`: the URL string. For `.videoFile`: absolute path in the container.
+    /// For `.plainText`: the text payload.
     let value: String
     let receivedAt: Date
+    var extractionMode: ShareExtractionMode
+    /// When true the main app starts parsing immediately (user confirmed in Share Extension).
+    var autoStartImport: Bool
 
-    init(kind: Kind, value: String) {
+    init(
+        kind: Kind,
+        value: String,
+        extractionMode: ShareExtractionMode = .captionOrDescription,
+        autoStartImport: Bool = true
+    ) {
         self.id = UUID().uuidString
         self.kind = kind
         self.value = value
         self.receivedAt = Date()
+        self.extractionMode = extractionMode
+        self.autoStartImport = autoStartImport
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, kind, value, receivedAt, extractionMode, autoStartImport
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        kind = try container.decode(Kind.self, forKey: .kind)
+        value = try container.decode(String.self, forKey: .value)
+        receivedAt = try container.decode(Date.self, forKey: .receivedAt)
+        extractionMode = try container.decodeIfPresent(ShareExtractionMode.self, forKey: .extractionMode)
+            ?? .captionOrDescription
+        autoStartImport = try container.decodeIfPresent(Bool.self, forKey: .autoStartImport) ?? true
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(value, forKey: .value)
+        try container.encode(receivedAt, forKey: .receivedAt)
+        try container.encode(extractionMode, forKey: .extractionMode)
+        try container.encode(autoStartImport, forKey: .autoStartImport)
     }
 }
 
@@ -45,16 +83,36 @@ enum PendingImportStore {
     static let appGroupID = "group.com.abhishekbiju.mealkit"
     private static let fileName = "pendingImports.json"
 
+    /// Test-only override so extension + app processes can share a directory in unit tests.
+    nonisolated(unsafe) private static var containerDirectoryOverride: URL?
+
+    /// True when the App Group container is available (required for Share Extension on device).
+    static var isUsingAppGroupContainer: Bool {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) != nil
+    }
+
+    #if DEBUG
+    static func useContainerDirectory(_ url: URL) {
+        containerDirectoryOverride = url
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+    }
+
+    static func resetContainerDirectoryOverride() {
+        containerDirectoryOverride = nil
+    }
+    #endif
+
     // MARK: - Container resolution
 
-    /// The directory used to store the pending imports file.
-    /// Prefers the App Group shared container; falls back to a local temp dir.
     static var containerDirectory: URL {
+        if let override = containerDirectoryOverride {
+            return override
+        }
         if let groupURL = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
             return groupURL
         }
-        // Fallback for simulator / no-entitlement builds.
+        // Per-process fallback — NOT visible to Share Extension. Queue only works in-process.
         let fallback = FileManager.default.temporaryDirectory
             .appendingPathComponent("MealKitPendingImports", isDirectory: true)
         try? FileManager.default.createDirectory(at: fallback, withIntermediateDirectories: true)

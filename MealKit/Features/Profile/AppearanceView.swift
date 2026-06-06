@@ -5,19 +5,23 @@ struct AppearanceView: View {
 
     var body: some View {
         @Bindable var prefs = prefs
-        List {
-            Section {
-                Picker("Appearance", selection: $prefs.appearancePreference) {
-                    ForEach(UserPreferencesStore.AppearancePreference.allCases, id: \.self) { option in
-                        Text(option.displayName).tag(option)
+        PurpleScreenContainer {
+            List {
+                Section {
+                    Picker("Appearance", selection: $prefs.appearancePreference) {
+                        ForEach(UserPreferencesStore.AppearancePreference.allCases, id: \.self) { option in
+                            Text(option.displayName).tag(option)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                } footer: {
+                    Text("Controls whether MealKit uses light or dark mode.")
                 }
-                .pickerStyle(.segmented)
-            } footer: {
-                Text("Controls whether MealKit uses light or dark mode.")
             }
+            .mkInsetListStyle()
         }
         .navigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 }

@@ -1,25 +1,51 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Color tokens
 
 extension Color {
-    /// Light lavender that underpins every background in the app.
-    static let mkBackground = Color(red: 0.97, green: 0.96, blue: 1.00)
-    /// Deeper lavender used behind glass cards.
-    static let mkSurface = Color(red: 0.93, green: 0.91, blue: 0.99)
+    /// Light lavender (light mode) / deep purple (dark mode).
+    static let mkBackground = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.10, green: 0.08, blue: 0.15, alpha: 1)
+            : UIColor(red: 0.97, green: 0.96, blue: 1.00, alpha: 1)
+    })
+
+    /// Deeper lavender (light) / elevated purple surface (dark).
+    static let mkSurface = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.14, green: 0.11, blue: 0.20, alpha: 1)
+            : UIColor(red: 0.93, green: 0.91, blue: 0.99, alpha: 1)
+    })
+
     /// Teal-green for secondary accents (dietary tags, "healthy" badges, etc.)
     static let mkGreen = Color(red: 0.25, green: 0.42, blue: 0.42)
+
     /// Medium purple secondary accent.
     static let mkPurple = Color(red: 0.48, green: 0.36, blue: 0.66)
+
     /// Soft lilac for tags, chips, and subtle highlights.
     static let mkLilac = Color(red: 0.72, green: 0.61, blue: 0.90)
+
+    /// Adaptive stroke tint for glass cards.
+    static let mkGlassTint = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor.white.withAlphaComponent(0.18)
+            : UIColor.white.withAlphaComponent(0.85)
+    })
 }
 
 // MARK: - Glass card modifier
 
 struct GlassCard: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
     var cornerRadius: CGFloat = 20
-    var tint: Color = .white
+    var tint: Color?
+
+    private var resolvedTint: Color {
+        tint ?? .mkGlassTint
+    }
 
     func body(content: Content) -> some View {
         content
@@ -28,15 +54,20 @@ struct GlassCard: ViewModifier {
                     .fill(.ultraThinMaterial)
                     .overlay(
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(tint.opacity(0.25), lineWidth: 1)
+                            .strokeBorder(resolvedTint.opacity(0.25), lineWidth: 1)
                     )
             )
-            .shadow(color: .black.opacity(0.07), radius: 18, x: 0, y: 6)
+            .shadow(
+                color: .black.opacity(colorScheme == .dark ? 0.35 : 0.07),
+                radius: 18,
+                x: 0,
+                y: 6
+            )
     }
 }
 
 extension View {
-    func glassCard(cornerRadius: CGFloat = 20, tint: Color = .white) -> some View {
+    func glassCard(cornerRadius: CGFloat = 20, tint: Color? = nil) -> some View {
         modifier(GlassCard(cornerRadius: cornerRadius, tint: tint))
     }
 }
@@ -44,8 +75,10 @@ extension View {
 // MARK: - Glass gradient background
 
 /// Full-screen purple gradient with blurred accent blobs — the backdrop
-/// used behind every top-level view.
+/// used behind every top-level view. Adapts to light and dark mode.
 struct WarmGlassBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         ZStack {
             LinearGradient(
@@ -54,23 +87,27 @@ struct WarmGlassBackground: View {
                 endPoint: .bottomTrailing
             )
 
-            // Medium purple blob top-left
             Circle()
-                .fill(Color.accentColor.opacity(0.22))
+                .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.35 : 0.22))
                 .frame(width: 300, height: 300)
                 .blur(radius: 80)
                 .offset(x: -90, y: -130)
 
-            // Lilac blob lower-right
             Circle()
-                .fill(Color.mkLilac.opacity(0.20))
+                .fill(Color.mkLilac.opacity(colorScheme == .dark ? 0.28 : 0.20))
                 .frame(width: 240, height: 240)
                 .blur(radius: 70)
                 .offset(x: 110, y: 280)
 
-            // Soft pink hint centre-right
             Circle()
-                .fill(Color(red: 0.85, green: 0.65, blue: 0.90).opacity(0.15))
+                .fill(
+                    Color(
+                        red: colorScheme == .dark ? 0.55 : 0.85,
+                        green: colorScheme == .dark ? 0.35 : 0.65,
+                        blue: colorScheme == .dark ? 0.70 : 0.90
+                    )
+                    .opacity(colorScheme == .dark ? 0.22 : 0.15)
+                )
                 .frame(width: 180, height: 180)
                 .blur(radius: 60)
                 .offset(x: 130, y: -40)
@@ -150,6 +187,40 @@ struct TagChip: View {
                     .overlay(Capsule().strokeBorder(color.opacity(0.25), lineWidth: 1))
             )
             .foregroundStyle(color)
+    }
+}
+
+// MARK: - Purple screen + styled lists
+
+/// Backdrop used behind tab roots and settings screens.
+struct PurpleScreenContainer<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            WarmGlassBackground()
+            content()
+        }
+    }
+}
+
+/// Hides the system list background and uses glass rows on the purple gradient.
+struct MKInsetListStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .listRowSeparatorTint(Color.primary.opacity(0.12))
+            .listRowBackground(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(.ultraThinMaterial)
+            )
+    }
+}
+
+extension View {
+    func mkInsetListStyle() -> some View {
+        modifier(MKInsetListStyle())
     }
 }
 

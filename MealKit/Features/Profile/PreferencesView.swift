@@ -9,7 +9,8 @@ struct PreferencesView: View {
     ]
 
     var body: some View {
-        List {
+        PurpleScreenContainer {
+            List {
             Section {
                 ForEach(allTags, id: \.self) { tag in
                     Button {
@@ -35,8 +36,11 @@ struct PreferencesView: View {
             } footer: {
                 Text("These are pre-selected when you generate a new meal plan.")
             }
+            }
+            .mkInsetListStyle()
         }
         .navigationTitle("Dietary Preferences")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 }

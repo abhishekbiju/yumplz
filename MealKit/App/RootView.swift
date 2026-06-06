@@ -7,6 +7,14 @@ extension Notification.Name {
     /// Posted when the app is opened via a `mealkit://import?text=…` URL.
     /// The `object` is the percent-decoded text `String`.
     static let mealKitImportDeepLink = Notification.Name("com.abhishekbiju.mealkit.importDeepLink")
+    /// Posted when the Share Extension opens the app via `mealkit://import?launch=1`.
+    static let mealKitPendingImportLaunch = Notification.Name("com.abhishekbiju.mealkit.pendingImportLaunch")
+}
+
+enum MealKitImportDeepLinkUserInfoKey {
+    static let autoStart = "autoStart"
+    static let extractionMode = "extractionMode"
+    static let importKind = "importKind"
 }
 
 /// Authentication switchboard. Per ADR 0003, the app is gated by Sign in with
@@ -48,21 +56,53 @@ struct RootView: View {
                 let manager = AuthenticationManager(modelContext: modelContext)
                 auth = manager
                 await manager.restoreSession()
+#if DEBUG
+                if ProcessInfo.processInfo.environment["MEALKIT_SCREENSHOT_MODE"] == "1",
+                   case .unauthenticated = manager.state {
+                    manager.signInAsDevUser()
+                }
+#endif
             }
         }
         .onOpenURL { url in
             handleDeepLink(url)
         }
+        #if DEBUG
+        .task {
+            // DEBUG-only test seam: lets us drive the share-import deep link from
+            // `simctl launch` (env var) without the system "Open in app?" consent
+            // dialog. Never compiled into release builds.
+            if let raw = ProcessInfo.processInfo.environment["MEALKIT_TEST_DEEPLINK"],
+               let url = URL(string: raw) {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                handleDeepLink(url)
+            }
+        }
+        #endif
     }
 
     // MARK: - Deep link handling
 
     private func handleDeepLink(_ url: URL) {
         guard url.scheme == "mealkit", url.host == "import" else { return }
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let text = components.queryItems?.first(where: { $0.name == "text" })?.value,
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
+
+        // Share Extension launch — MainTabView drains queue on first appear.
+        if components.queryItems?.contains(where: { $0.name == "launch" && $0.value == "1" }) == true {
+            NotificationCenter.default.post(name: .mealKitPendingImportLaunch, object: nil)
+            return
+        }
+
+        guard let text = components.queryItems?.first(where: { $0.name == "text" })?.value,
               !text.isEmpty else { return }
-        NotificationCenter.default.post(name: .mealKitImportDeepLink, object: text)
+        let autoStart = components.queryItems?.first(where: { $0.name == "autostart" })?.value != "0"
+        let userInfo: [String: Any] = [MealKitImportDeepLinkUserInfoKey.autoStart: autoStart]
+        ShareImportDelivery.storePendingDeepLink(payload: text, userInfo: userInfo)
+        NotificationCenter.default.post(
+            name: .mealKitImportDeepLink,
+            object: text,
+            userInfo: userInfo
+        )
     }
 }
 

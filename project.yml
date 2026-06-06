@@ -92,6 +92,10 @@ targets:
           - processing
         NSUserActivityTypes:
           - com.abhishekbiju.mealkit.importRecipe
+        CFBundleURLTypes:
+          - CFBundleURLName: com.abhishekbiju.mealkit.import
+            CFBundleURLSchemes:
+              - mealkit
         NSCameraUsageDescription: "MealKit uses the camera to import recipes from photos of cookbooks, magazines, and handwritten notes."
         NSPhotoLibraryUsageDescription: "MealKit reads photos from your library to import recipes from screenshots and saved images."
         NSPhotoLibraryAddUsageDescription: "MealKit saves recipe photos to your library when you choose to export them."
@@ -128,6 +132,8 @@ targets:
       # Also include PendingImportStore from the main app sources so the
       # extension can write to the shared queue without duplicating code.
       - path: MealKit/Services/PendingImportStore.swift
+      - path: MealKit/Services/Import/SocialPlatformDetector.swift
+      - path: MealKit/Services/ShareImportPreferences.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.mealkit.shareextension

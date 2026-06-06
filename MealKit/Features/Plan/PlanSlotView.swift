@@ -41,12 +41,26 @@ struct PlanSlotView: View {
                     .foregroundStyle(.tertiary)
                     .padding(.vertical, 4)
             } else {
-                ForEach(meals) { meal in
-                    MealRow(meal: meal, onMarkCooked: { markAsCooked(meal) }, onRemove: { removeMeal(meal) }, onEditServings: {
-                        editingServingsMeal = meal
-                        editingServingsValue = meal.plannedServings ?? meal.recipe?.servings ?? 1
-                    })
+                List {
+                    ForEach(meals) { meal in
+                        MealRow(
+                            meal: meal,
+                            onMarkCooked: { markAsCooked(meal) },
+                            onUncook: { uncookMeal(meal) },
+                            onRemove: { removeMeal(meal) },
+                            onEditServings: {
+                                editingServingsMeal = meal
+                                editingServingsValue = meal.plannedServings ?? meal.recipe?.servings ?? 1
+                            }
+                        )
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
                 }
+                .listStyle(.plain)
+                .scrollDisabled(true)
+                .frame(height: CGFloat(meals.count) * 58)
             }
         }
         .padding(14)
@@ -112,6 +126,12 @@ struct PlanSlotView: View {
         try? context.save()
     }
 
+    private func uncookMeal(_ meal: PlannedMeal) {
+        meal.isCooked = false
+        meal.cookedAt = nil
+        try? context.save()
+    }
+
     private func removeMeal(_ meal: PlannedMeal) {
         context.delete(meal)
         try? context.save()
@@ -123,6 +143,7 @@ struct PlanSlotView: View {
 private struct MealRow: View {
     let meal: PlannedMeal
     let onMarkCooked: () -> Void
+    let onUncook: () -> Void
     let onRemove: () -> Void
     let onEditServings: () -> Void
 
@@ -155,33 +176,6 @@ private struct MealRow: View {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(Color.mkGreen)
             }
-
-            Menu {
-                if !meal.isCooked {
-                    Button {
-                        onMarkCooked()
-                    } label: {
-                        Label("Mark as Cooked", systemImage: "checkmark.circle")
-                    }
-                }
-                if !meal.isNoteOnly {
-                    Button {
-                        onEditServings()
-                    } label: {
-                        Label("Edit Servings", systemImage: "person.2")
-                    }
-                }
-                Button(role: .destructive) {
-                    onRemove()
-                } label: {
-                    Label("Remove", systemImage: "trash")
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(6)
-            }
         }
         .padding(8)
         .background(
@@ -189,6 +183,38 @@ private struct MealRow: View {
                 .fill(Color.mkSurface.opacity(0.5))
         )
         .opacity(meal.isCooked ? 0.6 : 1.0)
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            if meal.isCooked {
+                Button {
+                    onUncook()
+                } label: {
+                    Label("Undo", systemImage: "arrow.uturn.backward")
+                }
+                .tint(.orange)
+            } else {
+                Button {
+                    onMarkCooked()
+                } label: {
+                    Label("Cooked", systemImage: "checkmark.circle")
+                }
+                .tint(.green)
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            if !meal.isNoteOnly {
+                Button {
+                    onEditServings()
+                } label: {
+                    Label("Servings", systemImage: "person.2")
+                }
+                .tint(.blue)
+            }
+            Button(role: .destructive) {
+                onRemove()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
     }
 }
 

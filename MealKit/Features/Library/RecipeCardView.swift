@@ -6,45 +6,77 @@ import SwiftUI
 struct RecipeCardView: View {
     let recipe: Recipe
 
+    private var isImporting: Bool { recipe.isImportInProgress || recipe.importFailed }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             heroSection
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top) {
-                    Text(recipe.title)
+                    Text(RecipeDisplayFormatter.cardTitle(recipe.title))
                         .font(.mkHeading)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     Spacer(minLength: 4)
-                    Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
-                        .foregroundStyle(recipe.isFavorite ? Color.red : Color.secondary)
-                        .font(.system(size: 15, weight: .medium))
-                }
-
-                HStack(spacing: 6) {
-                    if let totalTime = recipe.totalTimeSeconds {
-                        Label(formatTime(totalTime), systemImage: "clock")
-                            .font(.mkCaption)
-                            .foregroundStyle(.secondary)
-                    }
-                    if let cuisine = recipe.cuisine {
-                        TagChip(text: cuisine)
+                    if !isImporting {
+                        Image(systemName: recipe.isFavorite ? "heart.fill" : "heart")
+                            .foregroundStyle(recipe.isFavorite ? Color.red : Color.secondary)
+                            .font(.system(size: 15, weight: .medium))
                     }
                 }
 
-                if !recipe.dietaryTags.isEmpty {
-                    HStack(spacing: 4) {
-                        ForEach(recipe.dietaryTags.prefix(2), id: \.self) { tag in
-                            TagChip(text: tag, color: .mkGreen)
-                        }
-                    }
+                if isImporting {
+                    importStatusRow
+                } else {
+                    metadataRow
                 }
             }
             .padding(12)
         }
         .glassCard(cornerRadius: 16)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .opacity(isImporting ? 0.92 : 1)
+    }
+
+    private var importStatusRow: some View {
+        HStack(spacing: 8) {
+            if recipe.importFailed {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                    .font(.system(size: 13))
+            } else {
+                ProgressView()
+                    .controlSize(.small)
+            }
+            Text(recipe.importStatusLabel)
+                .font(.mkCaption)
+                .foregroundStyle(recipe.importFailed ? .orange : .secondary)
+                .lineLimit(2)
+        }
+    }
+
+    private var metadataRow: some View {
+        Group {
+            HStack(spacing: 6) {
+                if let totalTime = recipe.totalTimeSeconds {
+                    Label(formatTime(totalTime), systemImage: "clock")
+                        .font(.mkCaption)
+                        .foregroundStyle(.secondary)
+                }
+                if let cuisine = recipe.cuisine {
+                    TagChip(text: cuisine)
+                }
+            }
+
+            if !recipe.dietaryTags.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(recipe.dietaryTags.prefix(2), id: \.self) { tag in
+                        TagChip(text: tag, color: .mkGreen)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Hero image / placeholder
@@ -60,9 +92,18 @@ struct RecipeCardView: View {
         } else {
             ZStack {
                 placeholderGradient
-                Image(systemName: "fork.knife")
-                    .font(.system(size: 26, weight: .ultraLight))
-                    .foregroundStyle(.white.opacity(0.75))
+                if recipe.isImportInProgress {
+                    ProgressView()
+                        .tint(.white)
+                } else if recipe.importFailed {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 26, weight: .ultraLight))
+                        .foregroundStyle(.white.opacity(0.85))
+                } else {
+                    Image(systemName: "fork.knife")
+                        .font(.system(size: 26, weight: .ultraLight))
+                        .foregroundStyle(.white.opacity(0.75))
+                }
             }
             .frame(height: 120)
         }

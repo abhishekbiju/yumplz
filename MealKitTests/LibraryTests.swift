@@ -116,4 +116,22 @@ final class LibraryTests: XCTestCase {
         XCTAssertEqual(recipes.count, 1)
         XCTAssertEqual(recipes.first?.title, "Survivor Recipe")
     }
+
+    @MainActor
+    func testDeleteRecipeRemovesFromLibrary() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        let keep = Recipe(title: "Keep Me")
+        let remove = Recipe(title: "Delete Me")
+        context.insert(keep)
+        context.insert(remove)
+        try context.save()
+
+        RecipeLibraryActions.delete(remove, in: context)
+
+        let recipes = try context.fetch(FetchDescriptor<Recipe>())
+        XCTAssertEqual(recipes.count, 1)
+        XCTAssertEqual(recipes.first?.title, "Keep Me")
+    }
 }

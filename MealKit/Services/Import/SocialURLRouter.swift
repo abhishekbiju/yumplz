@@ -2,15 +2,8 @@ import Foundation
 
 // MARK: - Public types
 
-enum SocialPlatform: Equatable, Sendable {
-    case tiktok
-    case youtube
-    case instagram
-    case other
-}
-
-enum SocialURLResult: Sendable {
-    case text(String)      // Extracted text ready for LLM
+enum SocialURLResult: Equatable, Sendable {
+    case recipeText(RecipeImportContext)
     case needsVideoFile    // Instagram / unsupported — prompt user to share the file
     case useHTMLScrape     // Non-social URL — fall back to existing HTML scraper
 }
@@ -26,21 +19,7 @@ enum SocialURLRouter: Sendable {
 
     /// Returns the social platform for the given URL based on its host.
     static func platform(for url: URL) -> SocialPlatform {
-        let host = url.host?.lowercased() ?? ""
-        if host == "tiktok.com" || host.hasSuffix(".tiktok.com") {
-            return .tiktok
-        } else if host == "youtu.be"
-                    || host == "youtube.com"
-                    || host.hasSuffix(".youtube.com") {
-            return .youtube
-        } else if host == "instagram.com"
-                    || host == "instagr.am"
-                    || host.hasSuffix(".instagram.com")
-                    || host.hasSuffix(".instagr.am") {
-            return .instagram
-        } else {
-            return .other
-        }
+        SocialPlatformDetector.platform(for: url)
     }
 
     // MARK: – Main entry point
@@ -49,16 +28,16 @@ enum SocialURLRouter: Sendable {
     /// Must be called from a `@MainActor` context because `WhisperTranscriptionService`
     /// is `@MainActor`-isolated.
     @MainActor
-    static func route(url: URL, whisper: WhisperTranscriptionService) async throws -> SocialURLResult {
+    static func route(url: URL, session: URLSession = .shared) async throws -> SocialURLResult {
         switch platform(for: url) {
         case .instagram:
             return .needsVideoFile
         case .other:
             return .useHTMLScrape
         case .tiktok:
-            return try await routeTikTok(url: url, whisper: whisper)
+            return try await routeTikTok(url: url, session: session)
         case .youtube:
-            return try await routeYouTube(url: url)
+            return try await routeYouTube(url: url, session: session)
         }
     }
 
@@ -73,6 +52,11 @@ enum SocialURLRouter: Sendable {
             let id = parts[1]
             return id.isEmpty ? nil : id
         } else if host == "youtube.com" || host.hasSuffix(".youtube.com") {
+            let parts = url.pathComponents.filter { $0 != "/" }
+            if parts.first == "shorts", parts.count >= 2 {
+                let id = parts[1]
+                return id.isEmpty ? nil : id
+            }
             guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
             return comps.queryItems?.first(where: { $0.name == "v" })?.value
         }
@@ -105,29 +89,93 @@ enum SocialURLRouter: Sendable {
             .joined(separator: " ")
     }
 
+    /// Pulls the public video title embedded in YouTube page JSON / meta tags.
+    static func extractYouTubeVideoTitle(from html: String) -> String? {
+        let patterns = [
+            #""videoDetails"\s*:\s*\{[^}]*"title"\s*:\s*"((?:\\.|[^"\\])*)""#,
+            #""title"\s*:\s*\{\s*"simpleText"\s*:\s*"((?:\\.|[^"\\])*)""#,
+            #"<meta[^>]+property="og:title"[^>]+content="([^"]+)""#,
+            #"<meta[^>]+content="([^"]+)"[^>]+property="og:title""#,
+        ]
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+                  let match = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
+                  let range = Range(match.range(at: 1), in: html) else { continue }
+            let decoded = decodeJSONStringEscapes(String(html[range]))
+            if decoded.count >= 3 { return decoded }
+        }
+        return nil
+    }
+
+    /// Pulls description text embedded in YouTube page JSON (works for Shorts).
+    static func extractYouTubeInlineDescription(from html: String) -> String? {
+        let patterns = [
+            #""shortDescription"\s*:\s*"((?:\\.|[^"\\])*)""#,
+            #""attributedDescriptionBodyText"\s*:\s*\{[^}]*"content"\s*:\s*"((?:\\.|[^"\\])*)""#,
+            #""description"\s*:\s*\{\s*"simpleText"\s*:\s*"((?:\\.|[^"\\])*)""#,
+        ]
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+                  let match = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
+                  let range = Range(match.range(at: 1), in: html) else { continue }
+            let decoded = decodeJSONStringEscapes(String(html[range]))
+            if decoded.count >= 20 { return decoded }
+        }
+        return nil
+    }
+
+    private static func decodeJSONStringEscapes(_ raw: String) -> String {
+        raw
+            .replacingOccurrences(of: "\\n", with: "\n")
+            .replacingOccurrences(of: "\\\"", with: "\"")
+            .replacingOccurrences(of: "\\/", with: "/")
+            .replacingOccurrences(of: "\\u0026", with: "&")
+    }
+
     @MainActor
-    private static func routeYouTube(url: URL) async throws -> SocialURLResult {
+    private static func routeYouTube(url: URL, session: URLSession) async throws -> SocialURLResult {
         guard let videoID = extractYouTubeVideoID(from: url) else {
             return .useHTMLScrape
         }
 
-        // Try captions via the timedtext API first (no auth required for public videos).
-        let timedtextURLStr = "https://www.youtube.com/api/timedtext?v=\(videoID)&lang=en&fmt=json3"
-        if let timedtextURL = URL(string: timedtextURLStr),
-           let (data, _) = try? await URLSession.shared.data(from: timedtextURL) {
-            let transcript = parseTimedtextJSON(data)
-            if !transcript.isEmpty {
-                return .text(transcript)
+        // Fetch the watch/shorts page once — used for inline JSON + meta fallbacks.
+        var pageReq = URLRequest(url: url, timeoutInterval: 20)
+        pageReq.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
+        var pageHTML: String?
+        if let (data, _) = try? await session.data(for: pageReq) {
+            pageHTML = String(data: data, encoding: .utf8)
+        }
+
+        if let html = pageHTML {
+            let title = extractYouTubeVideoTitle(from: html)
+            if let inline = extractYouTubeInlineDescription(from: html) {
+                return .recipeText(RecipeImportContext(videoTitle: title, cleanedText: inline))
+            }
+            if let title, title.count >= 20 {
+                return .recipeText(RecipeImportContext(videoTitle: title, cleanedText: title))
             }
         }
 
-        // Fall back to og:description / meta description from the page.
-        var req = URLRequest(url: url, timeoutInterval: 20)
-        req.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
-        if let (data, _) = try? await URLSession.shared.data(for: req),
-           let html = String(data: data, encoding: .utf8),
-           let desc = extractMetaDescription(from: html), !desc.isEmpty {
-            return .text(desc)
+        // Captions via timedtext (try several language codes).
+        for lang in ["en", "en-US", "a.en"] {
+            let timedtextURLStr = "https://www.youtube.com/api/timedtext?v=\(videoID)&lang=\(lang)&fmt=json3"
+            guard let timedtextURL = URL(string: timedtextURLStr) else { continue }
+            var timedtextReq = URLRequest(url: timedtextURL, timeoutInterval: 15)
+            timedtextReq.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
+            if let (data, _) = try? await session.data(for: timedtextReq) {
+                let transcript = parseTimedtextJSON(data)
+                if transcript.count >= 20 {
+                    let title = pageHTML.flatMap { extractYouTubeVideoTitle(from: $0) }
+                    return .recipeText(RecipeImportContext(videoTitle: title, cleanedText: transcript))
+                }
+            }
+        }
+
+        if let html = pageHTML,
+           let desc = extractMetaDescription(from: html),
+           desc.count >= 20 {
+            let title = extractYouTubeVideoTitle(from: html)
+            return .recipeText(RecipeImportContext(videoTitle: title, cleanedText: desc))
         }
 
         return .useHTMLScrape
@@ -161,20 +209,14 @@ enum SocialURLRouter: Sendable {
         guard
             let regex  = try? NSRegularExpression(pattern: pattern),
             let match  = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
-            let range  = Range(match.range(at: 1), in: html)
+            let range  = Range(match.range(at: 1), in: html),
+            let data   = String(html[range]).data(using: .utf8),
+            let root   = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let itemStruct = extractTikTokItemStruct(from: root)
         else { return (nil, nil, nil) }
 
-        let jsonString = String(html[range])
-        guard
-            let data       = jsonString.data(using: .utf8),
-            let root       = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-            let scope      = root["DEFAULT_SCOPE"] as? [String: Any],
-            let detail     = scope["webapp.video-detail"] as? [String: Any],
-            let itemInfo   = detail["itemInfo"] as? [String: Any],
-            let itemStruct = itemInfo["itemStruct"] as? [String: Any]
-        else { return (nil, nil, nil) }
-
-        let desc = itemStruct["desc"] as? String
+        let desc = (itemStruct["desc"] as? String)
+            ?? extractTikTokShareMetaDesc(from: root)
 
         let audioURL: URL? = {
             if let music   = itemStruct["music"] as? [String: Any],
@@ -197,63 +239,154 @@ enum SocialURLRouter: Sendable {
         return (desc, audioURL, bioLink)
     }
 
+    /// TikTok embeds video JSON under several scope/detail keys depending on page type.
+    static func extractTikTokItemStruct(from root: [String: Any]) -> [String: Any]? {
+        let scope = (root["__DEFAULT_SCOPE__"] ?? root["DEFAULT_SCOPE"]) as? [String: Any]
+        guard let scope else { return nil }
+
+        let detailKeys = [
+            "webapp.video-detail",
+            "webapp.reflow.video.detail",
+        ]
+
+        for key in detailKeys {
+            guard let detail = scope[key] as? [String: Any],
+                  let itemInfo = detail["itemInfo"] as? [String: Any],
+                  let itemStruct = itemInfo["itemStruct"] as? [String: Any] else { continue }
+            return itemStruct
+        }
+        return nil
+    }
+
+    private static func extractTikTokShareMetaDesc(from root: [String: Any]) -> String? {
+        let scope = (root["__DEFAULT_SCOPE__"] ?? root["DEFAULT_SCOPE"]) as? [String: Any]
+        guard let scope else { return nil }
+
+        for key in ["webapp.reflow.video.detail", "webapp.video-detail"] {
+            guard let detail = scope[key] as? [String: Any],
+                  let shareMeta = detail["shareMeta"] as? [String: Any],
+                  let desc = shareMeta["desc"] as? String,
+                  !desc.isEmpty else { continue }
+            return desc
+        }
+        return nil
+    }
+
     @MainActor
-    private static func routeTikTok(url: URL, whisper: WhisperTranscriptionService) async throws -> SocialURLResult {
+    private static func routeTikTok(url: URL, session: URLSession) async throws -> SocialURLResult {
+        let canonicalURL = canonicalTikTokURL(url)
 
         // ── Tier 1 · Caption from rehydration JSON ──────────────────────────────
-        var req = URLRequest(url: url, timeoutInterval: 20)
-        req.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
-
-        let html: String
-        if let (data, _) = try? await URLSession.shared.data(for: req),
-           let str = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
-            html = str
-        } else {
-            html = ""
-        }
-
+        let html = await fetchPageHTML(url: canonicalURL, session: session)
         let (desc, audioURL, bioLink) = parseTikTokRehydrationHTML(html)
 
         let wordCount: (String?) -> Int = {
             ($0 ?? "").components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.count
         }
 
-        if let desc, wordCount(desc) >= 50 {
-            return .text(desc)
+        if let desc, isSubstantiveRecipeText(desc, wordCount: wordCount(desc)) {
+            return .recipeText(RecipeImportContext(cleanedText: desc))
         }
 
         // ── Tier 2 · Audio CDN download + WhisperKit transcription ──────────────
         if let audioURL {
             do {
+                let whisper = WhisperTranscriptionService()
                 try await whisper.ensureReady()
-                let tempFile = try await downloadToTemp(url: audioURL, ext: "m4a")
+                let tempFile = try await downloadToTemp(url: audioURL, ext: "m4a", session: session)
                 defer { try? FileManager.default.removeItem(at: tempFile) }
 
                 let transcript = try await whisper.transcribe(audioURL: tempFile)
-                if wordCount(transcript) >= 20 {
-                    return .text(transcript)
+                if isSubstantiveRecipeText(transcript, wordCount: wordCount(transcript)) {
+                    return .recipeText(RecipeImportContext(cleanedText: transcript))
                 }
             } catch {
-                // Tier 2 failed — fall through to Tier 3.
+                // Tier 2 failed — fall through.
             }
         }
 
         // ── Tier 3 · Bio-link or in-caption URL scrape ──────────────────────────
         let bioLinkURL: URL? = bioLink ?? extractURLFromText(desc ?? "")
         if let bioLinkURL {
-            var bioReq = URLRequest(url: bioLinkURL, timeoutInterval: 20)
-            bioReq.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
-            if let (data, _) = try? await URLSession.shared.data(for: bioReq),
-               let bioHTML = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
+            let bioHTML = await fetchPageHTML(url: bioLinkURL, session: session)
+            if !bioHTML.isEmpty {
                 let scraped = stripHTML(bioHTML)
-                if !scraped.isEmpty { return .text(scraped) }
+                if isSubstantiveRecipeText(scraped, wordCount: wordCount(scraped)) {
+                    return .recipeText(RecipeImportContext(cleanedText: scraped))
+                }
             }
         }
 
-        // Return thin caption if we have anything rather than failing silently.
-        if let desc, !desc.isEmpty { return .text(desc) }
+        // ── Tier 4 · oEmbed API (reliable when HTML shell omits rehydration JSON) ─
+        if let oembed = await fetchTikTokOEmbed(for: canonicalURL, session: session),
+           isSubstantiveRecipeText(oembed.caption, wordCount: wordCount(oembed.caption)) {
+            return .recipeText(RecipeImportContext(
+                videoTitle: oembed.authorName,
+                cleanedText: oembed.caption
+            ))
+        }
 
+        // ── Tier 5 · Any non-empty caption from rehydration (cleaner may still pass) ─
+        if let desc, !desc.isEmpty {
+            let context = RecipeImportContext(cleanedText: desc)
+            if context.cleanedText.count >= 40 {
+                return .recipeText(context)
+            }
+        }
+
+        // TikTok pages are client-rendered shells — HTML scrape yields ~22 chars.
         return .useHTMLScrape
+    }
+
+    /// Public oEmbed fetch used by tests and the TikTok routing tiers.
+    static func fetchTikTokOEmbed(
+        for url: URL,
+        session: URLSession
+    ) async -> (authorName: String?, caption: String)? {
+        var components = URLComponents(string: "https://www.tiktok.com/oembed")
+        components?.queryItems = [URLQueryItem(name: "url", value: canonicalTikTokURL(url).absoluteString)]
+        guard let oembedURL = components?.url else { return nil }
+
+        var req = URLRequest(url: oembedURL, timeoutInterval: 15)
+        req.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
+
+        guard
+            let (data, response) = try? await session.data(for: req),
+            let http = response as? HTTPURLResponse,
+            (200..<300).contains(http.statusCode),
+            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+
+        let caption = (json["title"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let author = (json["author_name"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let caption, !caption.isEmpty else { return nil }
+        return (author, caption)
+    }
+
+    private static func fetchPageHTML(url: URL, session: URLSession) async -> String {
+        var req = URLRequest(url: url, timeoutInterval: 20)
+        req.setValue(mobileUserAgent, forHTTPHeaderField: "User-Agent")
+        guard
+            let (data, response) = try? await session.data(for: req),
+            let http = response as? HTTPURLResponse,
+            (200..<400).contains(http.statusCode),
+            let str = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1)
+        else { return "" }
+        return str
+    }
+
+    /// Strips tracking query params from share URLs for a stable page fetch.
+    static func canonicalTikTokURL(_ url: URL) -> URL {
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.query = nil
+        components?.fragment = nil
+        return components?.url ?? url
+    }
+
+    /// Matches `ImportService.validateRecipeText` — enough text for the LLM to parse.
+    static func isSubstantiveRecipeText(_ text: String, wordCount: Int) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.count >= 40 || wordCount >= 25
     }
 
     // MARK: – Shared helpers
@@ -263,8 +396,8 @@ enum SocialURLRouter: Sendable {
         "AppleWebKit/605.1.15 (KHTML, like Gecko) " +
         "Version/17.0 Mobile/15E148 Safari/604.1"
 
-    private static func downloadToTemp(url: URL, ext: String) async throws -> URL {
-        let (data, _) = try await URLSession.shared.data(from: url)
+    private static func downloadToTemp(url: URL, ext: String, session: URLSession) async throws -> URL {
+        let (data, _) = try await session.data(from: url)
         let dest = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString + "." + ext)
         try data.write(to: dest)

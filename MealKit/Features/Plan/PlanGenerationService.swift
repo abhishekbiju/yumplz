@@ -8,6 +8,7 @@ struct PlanConstraints: Sendable {
     var startDate: Date
     var numberOfDays: Int                   // 1–7
     var dietaryTags: Set<String>            // e.g. "Vegetarian" — recipes must include ALL
+    var includedCuisines: Set<String>       // e.g. "Italian" — recipe must match one (if non-empty)
     var excludedCuisines: Set<String>       // e.g. "Italian" — excluded
     var maxCookTimeSeconds: Int?            // nil = no limit
     var servings: Int                       // propagated to PlannedMeal.plannedServings
@@ -16,6 +17,7 @@ struct PlanConstraints: Sendable {
         startDate: Date(),
         numberOfDays: 7,
         dietaryTags: [],
+        includedCuisines: [],
         excludedCuisines: [],
         maxCookTimeSeconds: nil,
         servings: 2
@@ -75,6 +77,12 @@ enum PlanCandidateFilter {
         if !required.isEmpty && !required.allSatisfy({ recipeTags.contains($0) }) {
             return false
         }
+        // Cuisine inclusion — when set, recipe must match at least one
+        if !constraints.includedCuisines.isEmpty {
+            guard let cuisine = recipe.cuisine?.lowercased(), !cuisine.isEmpty else { return false }
+            let allowed = constraints.includedCuisines.map { $0.lowercased() }
+            if !allowed.contains(cuisine) { return false }
+        }
         // Cuisine exclusion
         if let cuisine = recipe.cuisine?.lowercased(),
            constraints.excludedCuisines.contains(where: { $0.lowercased() == cuisine }) {
@@ -87,6 +95,79 @@ enum PlanCandidateFilter {
             return false
         }
         return true
+    }
+}
+
+// MARK: - Local candidate selection (no LLM)
+
+/// Picks recipes on-device for plan generation. Fast and deterministic enough
+/// for interactive use; avoids multi-minute per-slot LLM calls on a 3B model.
+enum PlanCandidatePicker {
+
+    /// Chooses the best candidate for a slot, preferring cuisine variety.
+    static func pickBest(
+        from candidates: [Recipe],
+        recentCuisines: [String]
+    ) -> Recipe? {
+        guard !candidates.isEmpty else { return nil }
+
+        let recent = Set(recentCuisines.map { $0.lowercased() })
+        let novel = candidates.filter { recipe in
+            guard let cuisine = recipe.cuisine?.lowercased(), !cuisine.isEmpty else { return true }
+            return !recent.contains(cuisine)
+        }
+
+        let pool = novel.isEmpty ? candidates : novel
+        return pool.randomElement()
+    }
+
+    /// Suggests swaps when the same cuisine appears on consecutive days.
+    static func varietySwaps(
+        draft: [PlanDraftAssembler.SlotKey: Recipe],
+        pool: [Recipe],
+        constraints: PlanConstraints
+    ) -> [PlanDraftAssembler.SlotKey: Recipe] {
+        let calendar = Calendar.current
+        let sortedKeys = draft.keys.sorted {
+            if $0.date != $1.date { return $0.date < $1.date }
+            let ai = Slot.allCases.firstIndex(of: $0.slot) ?? 0
+            let bi = Slot.allCases.firstIndex(of: $1.slot) ?? 0
+            return ai < bi
+        }
+
+        var swaps: [PlanDraftAssembler.SlotKey: Recipe] = [:]
+        var usedIDs = Set(draft.values.map(\.id))
+
+        for index in 1..<sortedKeys.count {
+            let prevKey = sortedKeys[index - 1]
+            let key = sortedKeys[index]
+            guard let prev = draft[prevKey], let current = draft[key] else { continue }
+
+            let prevCuisine = prev.cuisine?.lowercased()
+            let currentCuisine = current.cuisine?.lowercased()
+            guard let prevCuisine, let currentCuisine,
+                  prevCuisine == currentCuisine,
+                  !calendar.isDate(prevKey.date, inSameDayAs: key.date) else { continue }
+
+            var excluded = usedIDs
+            excluded.remove(current.id)
+
+            let alternatives = PlanCandidateFilter.candidates(
+                from: pool,
+                slot: key.slot,
+                constraints: constraints,
+                alreadyUsed: excluded
+            )
+            .filter { ($0.cuisine?.lowercased() ?? "") != currentCuisine }
+
+            if let replacement = alternatives.first {
+                swaps[key] = replacement
+                usedIDs.remove(current.id)
+                usedIDs.insert(replacement.id)
+            }
+        }
+
+        return swaps
     }
 }
 
@@ -138,11 +219,10 @@ enum PlanDraftAssembler {
 
 // MARK: - PlanGenerationService
 
-/// Orchestrates the four-step decomposed LLM plan generation (ADR 0004).
-/// - Step 1: enumerate (date, slot) pairs
-/// - Step 2: for each slot, pick a candidate via LLM or random fallback
-/// - Step 3: variety check via LLM (optional, falls back to no-op)
-/// - Step 4: apply swaps for flagged slots
+/// Builds a meal plan from the user's recipe library.
+/// Uses fast on-device selection (cuisine diversity + constraints) so generation
+/// finishes in seconds. Per-slot LLM calls were removed — they could run for
+/// minutes on a 3B model and appeared as a hung spinner.
 @MainActor
 @Observable
 final class PlanGenerationService {
@@ -171,24 +251,14 @@ final class PlanGenerationService {
         from pool: [Recipe],
         context: ModelContext
     ) async {
-        state = .generating(step: "Preparing…", progress: 0.0)
+        _ = context  // reserved for future persistence hooks
 
-        // Ensure LLM is loaded
-        let modelURL = ModelDownloadManager.modelsDirectory
-            .appendingPathComponent(LocalModel.llama3_2_3b.rawValue)
-        guard (try? modelURL.checkResourceIsReachable()) == true else {
-            state = .failed(GenerationError.modelNotDownloaded)
+        guard !pool.isEmpty else {
+            state = .failed(GenerationError.noEligibleRecipes)
             return
         }
 
-        if case .ready = inference.state {} else {
-            do {
-                try await inference.load(modelURL: modelURL)
-            } catch {
-                state = .failed(error)
-                return
-            }
-        }
+        state = .generating(step: "Preparing…", progress: 0.0)
 
         // Step 1 — enumerate slots
         let slots = enumerateSlots(startDate: constraints.startDate, days: constraints.numberOfDays)
@@ -197,13 +267,17 @@ final class PlanGenerationService {
             return
         }
 
-        // Step 2 — pick a recipe for each slot
+        // Step 2 — pick a recipe for each slot (on-device, no LLM)
         var selections: [PlanDraftAssembler.SlotKey: Recipe] = [:]
         var usedIDs = Set<UUID>()
+        var recentCuisines: [String] = []
 
         for (index, (date, slot)) in slots.enumerated() {
-            let progress = 0.1 + 0.6 * (Double(index) / Double(slots.count))
+            let progress = 0.1 + 0.65 * (Double(index) / Double(slots.count))
             state = .generating(step: "Picking \(slot.displayName) · \(dayLabel(date))…", progress: progress)
+
+            // Yield so SwiftUI can refresh the progress label between slots.
+            await Task.yield()
 
             let key = PlanDraftAssembler.SlotKey(date: date, slot: slot)
             let candidates = PlanCandidateFilter.candidates(
@@ -212,25 +286,32 @@ final class PlanGenerationService {
                 constraints: constraints,
                 alreadyUsed: usedIDs
             )
-            guard !candidates.isEmpty else { continue }
-
-            let picked = await pickViaLLM(
-                candidates: candidates,
-                date: date,
-                slot: slot,
-                constraints: constraints
-            ) ?? candidates.randomElement()!
+            guard let picked = PlanCandidatePicker.pickBest(
+                from: candidates,
+                recentCuisines: recentCuisines
+            ) else { continue }
 
             selections[key] = picked
             usedIDs.insert(picked.id)
+            if let cuisine = picked.cuisine {
+                recentCuisines.append(cuisine)
+                if recentCuisines.count > 6 { recentCuisines.removeFirst() }
+            }
         }
 
-        // Step 3 — variety check
-        state = .generating(step: "Checking variety…", progress: 0.75)
-        let swapSuggestions = await runVarietyCheck(draft: selections, pool: pool, constraints: constraints)
+        guard !selections.isEmpty else {
+            state = .failed(GenerationError.noEligibleRecipes)
+            return
+        }
 
-        // Step 4 — apply swaps
-        state = .generating(step: "Refining plan…", progress: 0.9)
+        // Step 3 — local variety pass (no LLM)
+        state = .generating(step: "Balancing variety…", progress: 0.85)
+        let swapSuggestions = PlanCandidatePicker.varietySwaps(
+            draft: selections,
+            pool: pool,
+            constraints: constraints
+        )
+
         for (swapKey, replacement) in swapSuggestions {
             if let current = selections[swapKey] {
                 usedIDs.remove(current.id)
@@ -272,130 +353,6 @@ final class PlanGenerationService {
             }
         }
         return result
-    }
-
-    /// Ask the LLM to pick from a candidate list. Returns nil on failure
-    /// (caller falls back to random selection).
-    private func pickViaLLM(
-        candidates: [Recipe],
-        date: Date,
-        slot: Slot,
-        constraints: PlanConstraints
-    ) async -> Recipe? {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        let dateStr = formatter.string(from: date)
-
-        struct CandidateDTO: Encodable {
-            let id: String
-            let title: String
-            let cuisine: String
-            let dietaryTags: [String]
-            let totalTimeSeconds: Int
-        }
-
-        let dtos = candidates.map { r in
-            CandidateDTO(
-                id: r.id.uuidString,
-                title: r.title,
-                cuisine: r.cuisine ?? "General",
-                dietaryTags: r.dietaryTags,
-                totalTimeSeconds: r.totalTimeSeconds ?? 0
-            )
-        }
-        guard let json = try? JSONEncoder().encode(dtos),
-              let jsonStr = String(data: json, encoding: .utf8) else { return nil }
-
-        let constraintStr = describeConstraints(constraints)
-        let prompt = RecipePrompts.planCandidatePickPrompt(
-            date: dateStr,
-            slot: slot.displayName,
-            constraints: constraintStr,
-            candidatesJSON: jsonStr
-        )
-
-        guard let raw = try? await inference.complete(prompt: prompt, maxNewTokens: 128),
-              let extracted = raw.extractedJSON(),
-              let data = extracted.data(using: .utf8) else { return nil }
-
-        struct PickDTO: Decodable { let selectedId: String }
-        guard let pick = try? JSONDecoder().decode(PickDTO.self, from: data),
-              let uuid = UUID(uuidString: pick.selectedId) else { return nil }
-
-        return candidates.first(where: { $0.id == uuid })
-    }
-
-    /// Ask the LLM to review the full draft for variety problems.
-    private func runVarietyCheck(
-        draft: [PlanDraftAssembler.SlotKey: Recipe],
-        pool: [Recipe],
-        constraints: PlanConstraints
-    ) async -> [PlanDraftAssembler.SlotKey: Recipe] {
-        struct DraftDTO: Encodable {
-            let date: String
-            let slot: String
-            let title: String
-            let cuisine: String
-        }
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        let dtos = draft.map { key, recipe in
-            DraftDTO(
-                date: formatter.string(from: key.date),
-                slot: key.slot.displayName,
-                title: recipe.title,
-                cuisine: recipe.cuisine ?? "General"
-            )
-        }
-        guard let json = try? JSONEncoder().encode(dtos),
-              let jsonStr = String(data: json, encoding: .utf8) else { return [:] }
-
-        let prompt = RecipePrompts.planVarietyCheckPrompt(draftPlanJSON: jsonStr)
-        guard let raw = try? await inference.complete(prompt: prompt, maxNewTokens: 512),
-              let extracted = raw.extractedJSON(),
-              let data = extracted.data(using: .utf8) else { return [:] }
-
-        struct SwapDTO: Decodable {
-            let date: String
-            let slot: String
-        }
-        guard let swaps = try? JSONDecoder().decode([SwapDTO].self, from: data),
-              !swaps.isEmpty else { return [:] }
-
-        // Re-run candidate selection for each flagged slot
-        var result: [PlanDraftAssembler.SlotKey: Recipe] = [:]
-        let usedIDs = Set(draft.values.map(\.id))
-
-        for swap in swaps {
-            guard let date = formatter.date(from: swap.date),
-                  let slot = Slot.allCases.first(where: { $0.displayName == swap.slot }) else { continue }
-            let key = PlanDraftAssembler.SlotKey(date: date, slot: slot)
-
-            // Exclude the current recipe for this slot from candidates
-            let currentID = draft[key]?.id
-            var excludedForSwap = usedIDs
-            if let c = currentID { excludedForSwap.remove(c) }
-
-            let candidates = PlanCandidateFilter.candidates(
-                from: pool,
-                slot: slot,
-                constraints: constraints,
-                alreadyUsed: excludedForSwap
-            )
-            if let replacement = await pickViaLLM(candidates: candidates, date: date, slot: slot, constraints: constraints)
-               ?? candidates.first {
-                result[key] = replacement
-            }
-        }
-        return result
-    }
-
-    private func describeConstraints(_ c: PlanConstraints) -> String {
-        var parts: [String] = []
-        if !c.dietaryTags.isEmpty { parts.append("Dietary: \(c.dietaryTags.joined(separator: ", "))") }
-        if !c.excludedCuisines.isEmpty { parts.append("Exclude cuisines: \(c.excludedCuisines.joined(separator: ", "))") }
-        if let maxSec = c.maxCookTimeSeconds { parts.append("Max cook time: \(maxSec / 60) min") }
-        return parts.isEmpty ? "No special constraints" : parts.joined(separator: "; ")
     }
 
     private func dayLabel(_ date: Date) -> String {

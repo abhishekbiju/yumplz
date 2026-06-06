@@ -69,47 +69,52 @@ struct MainTabView: View {
                     whisper: whisper
                 )
             }
+#if DEBUG
+            if let tabName = ProcessInfo.processInfo.environment["MEALKIT_SCREENSHOT_TAB"] {
+                selectedTab = screenshotTab(named: tabName) ?? selectedTab
+            }
+#endif
             houseRecipeStore.load()
+            // Cold launch from Share Extension skips scenePhase onChange — drain here too.
+            drainPendingImports()
+            // A deep link delivered during splash (before this view mounted) posts a
+            // notification nobody hears. The payload survives in the pending store, so
+            // surface the Library tab to mount its consumer.
+            if ShareImportDelivery.hasPendingDeepLink {
+                selectedTab = .library
+            }
         }
         .onChange(of: scenePhase) { _, phase in
-            // Drain the Share Extension queue each time the app foregrounds.
             if phase == .active {
                 drainPendingImports()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .mealKitPendingImportLaunch)) { _ in
+            drainPendingImports()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .mealKitImportDeepLink)) { _ in
+            selectedTab = .library
+        }
     }
+
+#if DEBUG
+    private func screenshotTab(named raw: String) -> Tab? {
+        switch raw.lowercased() {
+        case "discover": return .discover
+        case "library": return .library
+        case "plan": return .plan
+        case "grocery": return .grocery
+        case "profile": return .profile
+        default: return nil
+        }
+    }
+#endif
 
     // MARK: - Pending Import Draining
 
-    /// Drains the Share Extension queue and fires one deep-link notification
-    /// per item. LibraryView observes `.mealKitImportDeepLink` and opens the
-    /// import sheet pre-populated with the URL — the same path used by
-    /// `mealkit://import?text=…` deep links.
     private func drainPendingImports() {
-        let pending = PendingImportStore.drain()
-        guard !pending.isEmpty else { return }
-
-        // Switch to Library so the import sheet appears in the right tab.
-        selectedTab = .library
-
-        // Fire notifications with a small delay between each to avoid race
-        // conditions when multiple items were queued.
-        for (index, item) in pending.enumerated() {
-            let delay = Double(index) * 0.3
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                switch item.kind {
-                case .url:
-                    NotificationCenter.default.post(
-                        name: .mealKitImportDeepLink,
-                        object: item.value
-                    )
-                case .videoFile:
-                    NotificationCenter.default.post(
-                        name: .mealKitImportDeepLink,
-                        object: "file://\(item.value)"
-                    )
-                }
-            }
+        ShareImportDelivery.deliverPendingImports {
+            selectedTab = .library
         }
     }
 }

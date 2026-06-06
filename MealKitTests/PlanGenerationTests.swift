@@ -61,6 +61,25 @@ final class PlanGenerationTests: XCTestCase {
         XCTAssertFalse(PlanCandidateFilter.passesConstraints(meat, constraints: constraints))
     }
 
+    // ── Slice 3b ─────────────────────────────────────────────────────────
+    // Included cuisine filter — recipe must match at least one when set
+
+    func testIncludedCuisineFilter() throws {
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
+
+        let italian = makeRecipe(title: "Pasta", cuisine: "Italian", in: ctx)
+        let mexican = makeRecipe(title: "Tacos", cuisine: "Mexican", in: ctx)
+        let unknown = makeRecipe(title: "Snack", cuisine: nil, in: ctx)
+
+        var constraints = PlanConstraints.default
+        constraints.includedCuisines = ["Italian"]
+
+        XCTAssertTrue(PlanCandidateFilter.passesConstraints(italian, constraints: constraints))
+        XCTAssertFalse(PlanCandidateFilter.passesConstraints(mexican, constraints: constraints))
+        XCTAssertFalse(PlanCandidateFilter.passesConstraints(unknown, constraints: constraints))
+    }
+
     // ── Slice 3 ──────────────────────────────────────────────────────────
     // Cuisine exclusion filter
 
@@ -211,6 +230,54 @@ final class PlanGenerationTests: XCTestCase {
         XCTAssertEqual(meals.first?.slot, .breakfast)
         XCTAssertEqual(meals.first?.plannedServings, 2)
         XCTAssertEqual(meals.first?.recipe?.title, "Scrambled Eggs")
+    }
+
+    // ── Slice 12 ─────────────────────────────────────────────────────────
+    // PlanCandidatePicker prefers a novel cuisine over a repeated one
+
+    func testPickBestPrefersNovelCuisine() throws {
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
+
+        let italian1 = makeRecipe(title: "Pasta A", cuisine: "Italian", in: ctx)
+        let italian2 = makeRecipe(title: "Pasta B", cuisine: "Italian", in: ctx)
+        let mexican = makeRecipe(title: "Tacos", cuisine: "Mexican", in: ctx)
+
+        let picked = PlanCandidatePicker.pickBest(
+            from: [italian1, italian2, mexican],
+            recentCuisines: ["Italian", "Italian"]
+        )
+        XCTAssertEqual(picked?.id, mexican.id)
+    }
+
+    // ── Slice 13 ─────────────────────────────────────────────────────────
+    // varietySwaps replaces back-to-back same-cuisine days when possible
+
+    func testVarietySwapsChangesRepeatedCuisineAcrossDays() throws {
+        let container = try TestModelContainer.make()
+        let ctx = container.mainContext
+
+        let italianBreakfast = makeRecipe(title: "Frittata", cuisine: "Italian", in: ctx)
+        let italianDinner = makeRecipe(title: "Risotto", cuisine: "Italian", in: ctx)
+        let mexican = makeRecipe(title: "Tacos", cuisine: "Mexican", in: ctx)
+        try ctx.save()
+
+        let day1 = testMonday
+        let day2 = Calendar.current.date(byAdding: .day, value: 1, to: day1)!
+        var draft: [PlanDraftAssembler.SlotKey: Recipe] = [:]
+        draft[.init(date: day1, slot: .dinner)] = italianDinner
+        draft[.init(date: day2, slot: .breakfast)] = italianBreakfast
+
+        let pool = [italianBreakfast, italianDinner, mexican]
+        let swaps = PlanCandidatePicker.varietySwaps(
+            draft: draft,
+            pool: pool,
+            constraints: .default
+        )
+
+        XCTAssertFalse(swaps.isEmpty)
+        let replacement = swaps[.init(date: day2, slot: .breakfast)]
+        XCTAssertEqual(replacement?.cuisine, "Mexican")
     }
 
     // ── Slice 11 ─────────────────────────────────────────────────────────

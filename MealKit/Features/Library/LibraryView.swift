@@ -17,13 +17,13 @@ struct LibraryView: View {
 
     @State private var searchVM = LibrarySearchViewModel()
     @State private var navigationPath = NavigationPath()
-    @State private var showingImportSheet = false
-    @State private var pendingManualRecipe: Recipe? = nil
+    @State private var importPresentation: ImportPresentationRequest?
     @State private var showingNewCollectionAlert = false
+    @State private var pendingManualRecipe: Recipe? = nil
     @State private var newCollectionName = ""
     @State private var collectionToRename: RecipeCollection?
     @State private var renameText = ""
-    @State private var deepLinkPasteText: String? = nil
+    @State private var recipePendingDeletion: Recipe?
 
     var downloads: ModelDownloadManager
     var importService: ImportService
@@ -102,29 +102,46 @@ struct LibraryView: View {
             }
         }
         .searchable(text: $bvm.query, prompt: "Search recipes, cuisines, tags…")
-        .sheet(isPresented: $showingImportSheet) {
+        .sheet(item: $importPresentation) { presentation in
             ImportSheetView(
                 downloads: downloads,
                 importService: importService,
                 onManualEntry: { recipe in
                     pendingManualRecipe = recipe
                 },
-                initialPasteText: deepLinkPasteText
+                initialPasteText: presentation.route.pasteText,
+                initialImportURL: presentation.route.importURL,
+                initialVideoPath: presentation.route.videoPath,
+                autoStartImport: presentation.route.autoStartImport,
+                shareExtractionMode: presentation.route.extractionMode
             )
         }
-        .onChange(of: showingImportSheet) { _, isShowing in
-            // Deep-link paste text is consumed once the sheet opens.
-            if isShowing { deepLinkPasteText = nil }
+        .onChange(of: importPresentation) { _, newValue in
             // Navigate to the manually-created recipe once the sheet fully dismisses.
-            if !isShowing, let recipe = pendingManualRecipe {
+            if newValue == nil, let recipe = pendingManualRecipe {
                 navigationPath.append(recipe)
                 pendingManualRecipe = nil
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .mealKitImportDeepLink)) { note in
-            if let text = note.object as? String {
-                deepLinkPasteText = text
-                showingImportSheet = true
+            guard let text = note.object as? String else { return }
+            let request = ImportDeepLinkRouter.presentationRequest(
+                payload: text,
+                userInfo: note.userInfo
+            )
+            // Avoid cancelling in-flight imports by re-presenting the exact same route.
+            if importPresentation?.route != request.route {
+                importPresentation = request
+            }
+            // If we handled a live notification, prevent onAppear from replaying
+            // the same payload from the pending store.
+            ShareImportDelivery.clearPendingDeepLink()
+        }
+        .onAppear {
+            if let pending = ShareImportDelivery.consumePendingDeepLink() {
+                if importPresentation?.route != pending.route {
+                    importPresentation = pending
+                }
             }
         }
         .alert("New Collection", isPresented: $showingNewCollectionAlert) {
@@ -143,6 +160,7 @@ struct LibraryView: View {
             Button("Save") { saveRename() }
             Button("Cancel", role: .cancel) { collectionToRename = nil }
         }
+        .recipeDeleteConfirmation(recipe: $recipePendingDeletion)
     }
 
     // MARK: - Filter Bar
@@ -288,10 +306,28 @@ struct LibraryView: View {
 
                 LazyVGrid(columns: gridColumns, spacing: 12) {
                     ForEach(filteredRecipes) { recipe in
-                        NavigationLink(value: recipe) {
+                        if recipe.isImportInteractive {
+                            NavigationLink(value: recipe) {
+                                RecipeCardView(recipe: recipe)
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    recipePendingDeletion = recipe
+                                } label: {
+                                    Label("Delete Recipe", systemImage: "trash")
+                                }
+                            }
+                        } else {
                             RecipeCardView(recipe: recipe)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        recipePendingDeletion = recipe
+                                    } label: {
+                                        Label("Remove", systemImage: "trash")
+                                    }
+                                }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -351,7 +387,15 @@ struct LibraryView: View {
             HStack {
                 Spacer()
                 Button {
-                    showingImportSheet = true
+                    importPresentation = ImportPresentationRequest(
+                        route: ImportDeepLinkRouter.Route(
+                            importURL: nil,
+                            pasteText: nil,
+                            videoPath: nil,
+                            autoStartImport: false,
+                            extractionMode: .captionOrDescription
+                        )
+                    )
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 22, weight: .semibold))

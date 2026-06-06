@@ -63,6 +63,16 @@ final class Recipe {
     /// Needs Review — set when Import completed with low confidence in any field.
     var needsReview: Bool = false
 
+    /// When non-nil, the recipe is still being imported in the background.
+    /// Matches `ImportPhase` storage keys; cleared when import finishes successfully.
+    var importPhaseRaw: String?
+
+    /// User-facing error when `importPhaseRaw` is `"failed"`.
+    var importErrorMessage: String?
+
+    /// Original import URL — used for placeholder titles while extracting.
+    var importSourceURL: URL?
+
     // Relationships
     @Relationship(deleteRule: .cascade, inverse: \Ingredient.recipe)
     var ingredients: [Ingredient]? = []

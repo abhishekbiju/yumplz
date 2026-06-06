@@ -17,15 +17,18 @@ struct PlanGenerationSheet: View {
     // Constraint form state
     @State private var numberOfDays: Int = 7
     @State private var selectedDietaryTags: Set<String> = []
+    @State private var selectedCuisines: Set<String> = []
     @State private var hasAppliedPrefsDefaults = false
-    @State private var excludedCuisine: String = ""
     @State private var maxCookTime: MaxCookTimeOption = .any
     @State private var servings: Int = 2
 
     @State private var service: PlanGenerationService?
-    @State private var showModelGate = false
 
     private static let dietaryOptions = ["Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free"]
+
+    private var availableCuisines: [String] {
+        Array(Set(allRecipes.compactMap(\.cuisine).filter { !$0.isEmpty })).sorted()
+    }
 
     enum MaxCookTimeOption: String, CaseIterable, Identifiable {
         case any = "Any"
@@ -67,13 +70,6 @@ struct PlanGenerationSheet: View {
                 }
             }
         }
-        .sheet(isPresented: $showModelGate) {
-            ModelDownloadGateView(downloads: downloads) {
-                showModelGate = false
-                startGeneration()
-            }
-            .presentationDetents([.large])
-        }
     }
 
     // MARK: - Content routing
@@ -89,7 +85,6 @@ struct PlanGenerationSheet: View {
             case .draft(let draft):
                 DraftReviewView(
                     draft: draft,
-                    allRecipes: allRecipes,
                     onAccept: {
                         svc.commit(draft: draft, pool: allRecipes, context: context)
                         dismiss()
@@ -150,6 +145,34 @@ struct PlanGenerationSheet: View {
                 }
                 .padding(16)
                 .glassCard()
+
+                // Cuisine
+                if !availableCuisines.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label("Cuisine", systemImage: "globe")
+                            .font(.mkCaption)
+                            .foregroundStyle(.secondary)
+                        Text("Leave empty for any cuisine")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                        FlowLayout(spacing: 8) {
+                            ForEach(availableCuisines, id: \.self) { cuisine in
+                                FilterChip(
+                                    title: cuisine,
+                                    isSelected: selectedCuisines.contains(cuisine)
+                                ) {
+                                    if selectedCuisines.contains(cuisine) {
+                                        selectedCuisines.remove(cuisine)
+                                    } else {
+                                        selectedCuisines.insert(cuisine)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .glassCard()
+                }
 
                 // Cook time
                 VStack(alignment: .leading, spacing: 8) {
@@ -263,12 +286,7 @@ struct PlanGenerationSheet: View {
     // MARK: - Logic
 
     private func handleGenerateTap() {
-        let llmReady = downloads.state(for: .llama3_2_3b).isReady
-        if llmReady {
-            startGeneration()
-        } else {
-            showModelGate = true
-        }
+        startGeneration()
     }
 
     private func startGeneration() {
@@ -278,7 +296,8 @@ struct PlanGenerationSheet: View {
             startDate: Date(),
             numberOfDays: numberOfDays,
             dietaryTags: selectedDietaryTags,
-            excludedCuisines: excludedCuisine.isEmpty ? [] : [excludedCuisine],
+            includedCuisines: selectedCuisines,
+            excludedCuisines: [],
             maxCookTimeSeconds: maxCookTime.seconds,
             servings: servings
         )
@@ -292,7 +311,6 @@ struct PlanGenerationSheet: View {
 
 private struct DraftReviewView: View {
     let draft: [DraftMeal]
-    let allRecipes: [Recipe]
     let onAccept: () -> Void
     let onRetry: () -> Void
     let onCancel: () -> Void
@@ -310,6 +328,15 @@ private struct DraftReviewView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 16) {
+                    if draft.isEmpty {
+                        ContentUnavailableView(
+                            "No meals matched",
+                            systemImage: "calendar.badge.exclamationmark",
+                            description: Text("Try relaxing dietary or cook-time filters, or add more recipes to your Library.")
+                        )
+                        .padding(.top, 40)
+                    }
+
                     ForEach(draftByDay, id: \.0) { date, meals in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(dayFormatter.string(from: date))
@@ -348,6 +375,7 @@ private struct DraftReviewView: View {
                         .padding(.vertical, 4)
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(draft.isEmpty)
 
                 HStack(spacing: 20) {
                     Button("Try Again", action: onRetry)

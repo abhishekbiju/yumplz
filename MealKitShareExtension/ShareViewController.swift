@@ -1,20 +1,10 @@
 import UIKit
 import SwiftUI
 import UniformTypeIdentifiers
-import MobileCoreServices
 
 // MARK: - ShareViewController
 
-/// The principal class of the MealKit Share Extension.
-///
-/// Architecture: the extension is a **lightweight receiver only**. It:
-///   1. Inspects the shared item (URL or video file).
-///   2. If a video file: copies it into the App Group shared container.
-///   3. Writes a `PendingImportItem` to the shared JSON queue.
-///   4. Dismisses. The main app processes the queue on next foreground.
-///
-/// The LLM is NOT loaded in the extension — iOS caps extension memory at
-/// ~120 MB and loading a 2 GB model would be immediately killed.
+@MainActor
 final class ShareViewController: UIViewController {
 
     override func viewDidLoad() {
@@ -36,6 +26,9 @@ final class ShareViewController: UIViewController {
                         code: NSUserCancelledError
                     )
                 )
+            },
+            onOpenImport: { [weak self] sharedValue in
+                self?.openMealKit(with: sharedValue)
             }
         ))
 
@@ -49,5 +42,28 @@ final class ShareViewController: UIViewController {
             hostingVC.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
         hostingVC.didMove(toParent: self)
+    }
+
+    private func openMealKit(with sharedValue: String) {
+        guard let url = ShareAppLauncher.importDeepLinkURL(for: sharedValue, autoStart: true) else { return }
+        // NOTE: extensionContext.open() is NOT supported by Share extensions (only
+        // Today/iMessage). It always returns false. The only mechanism that works is
+        // walking the responder chain to the live UIApplication instance and calling
+        // the MODERN open(_:options:completionHandler:). The deprecated single-arg
+        // `openURL:` selector stopped working in iOS 18.
+        _ = openViaResponderChain(url)
+    }
+
+    @discardableResult
+    private func openViaResponderChain(_ url: URL) -> Bool {
+        var responder: UIResponder? = self
+        while let current = responder {
+            if let application = current as? UIApplication {
+                application.open(url, options: [:], completionHandler: nil)
+                return true
+            }
+            responder = current.next
+        }
+        return false
     }
 }

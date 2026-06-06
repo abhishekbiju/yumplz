@@ -12,7 +12,8 @@ struct PrivacyView: View {
     @State private var exportError: String?
 
     var body: some View {
-        List {
+        PurpleScreenContainer {
+            List {
             Section("Export") {
                 Button("Export my recipes") {
                     exportRecipes()
@@ -32,9 +33,12 @@ struct PrivacyView: View {
                     showDeleteConfirmation = true
                 }
             }
+            }
+            .mkInsetListStyle()
         }
         .navigationTitle("Privacy")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .confirmationDialog(
             "Delete All Your Data?",
             isPresented: $showDeleteConfirmation,

@@ -105,8 +105,7 @@ Implement issues #14, #15, #16 (in that order) when:
 
 - [ ] Solo validation of issues #2–#13 is complete and the developer is
       satisfied the core product is stable.
-- [ ] Apple Developer Program enrollment is confirmed
-      (`the developer Apple ID account` per the account used during development).
+- [ ] Apple Developer Program enrollment is confirmed.
 - [ ] `project.yml` entitlements are uncommented and a provisioning
       profile is generated.
 

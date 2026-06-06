@@ -7,10 +7,12 @@ struct RecipeDetailView: View {
     let recipe: Recipe
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @State private var showingAddToCollection = false
     @State private var showingCookMode = false
     @State private var showingShareSheet = false
     @State private var shareItems: [Any] = []
+    @State private var recipePendingDeletion: Recipe?
 
     var body: some View {
         ZStack {
@@ -56,6 +58,17 @@ struct RecipeDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 16) {
+                    Menu {
+                        Button(role: .destructive) {
+                            recipePendingDeletion = recipe
+                        } label: {
+                            Label("Delete Recipe", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel("Recipe actions")
+
                     Button {
                         shareItems = buildShareItems()
                         showingShareSheet = true
@@ -78,6 +91,9 @@ struct RecipeDetailView: View {
                     }
                 }
             }
+        }
+        .recipeDeleteConfirmation(recipe: $recipePendingDeletion) {
+            dismiss()
         }
         .sheet(isPresented: $showingAddToCollection) {
             AddToCollectionSheet(recipe: recipe)
@@ -170,7 +186,7 @@ struct RecipeDetailView: View {
                     HStack(spacing: 10) {
                         Text(IngredientEmojiMapper.emoji(for: ingredient))
                             .font(.body)
-                        Text(ingredient.originalText)
+                        Text(IngredientDisplayFormatter.displayText(for: ingredient, recipe: recipe))
                             .font(.mkBody)
                     }
                     .padding(.horizontal)
