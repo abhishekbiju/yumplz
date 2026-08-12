@@ -108,8 +108,8 @@ of solo feature validation.
 
 - All user data (Recipes, Collections, Meal Plans, Grocery Lists) is
   persisted locally via SwiftData **without** CloudKit sync.
-- The `ModelConfiguration` in `MealKitApp` uses the local SQLite store
-  (`MealKit.sqlite`) with no `cloudKitContainerIdentifier`. Data is
+- The `ModelConfiguration` in `YumplzApp` uses the local SQLite store
+  (`yumplz.sqlite`) with no `cloudKitContainerIdentifier`. Data is
   real and durable across launches but not synced across devices.
 - Data created during validation is **not recoverable** after an app
   reinstall or device wipe because there is no iCloud backup. This is
@@ -133,7 +133,7 @@ Implementation of CloudKit sync (GitHub issue #15) unblocks when:
    `project.yml`.
 3. The CloudKit schema is pushed to the container via Xcode's
    "Use CloudKit" switch in the signing & capabilities pane.
-4. `MealKitApp` is updated to pass `cloudKitContainerIdentifier:` to
+4. `YumplzApp` is updated to pass `cloudKitContainerIdentifier:` to
    `ModelConfiguration`.
 
 Data migration from the validation period is not required — the solo

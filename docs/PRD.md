@@ -1,4 +1,4 @@
-# MealKit — Product Requirements Document
+# yumplz — Product Requirements Document
 
 > **Status:** Draft · **Last updated:** 2026-05-25  
 > **First milestone:** TestFlight beta (all features unlocked, no paywall)  
@@ -22,7 +22,7 @@ Specifically, users face three compounding problems:
 
 ## Solution
 
-MealKit is an iOS-native recipe manager and meal planner that makes capturing, organising, cooking, and planning entirely local-first. It imports recipes from any source (URL, photo, social video, pasted text, or manual entry) using an on-device AI model that requires no internet connection after an initial one-time download. Recipes are stored, synced, and searched entirely on the user's device and iCloud — no server, no subscription just to use the core features.
+yumplz is an iOS-native recipe manager and meal planner that makes capturing, organising, cooking, and planning entirely local-first. It imports recipes from any source (URL, photo, social video, pasted text, or manual entry) using an on-device AI model that requires no internet connection after an initial one-time download. Recipes are stored, synced, and searched entirely on the user's device and iCloud — no server, no subscription just to use the core features.
 
 The app is structured around four primary actions: **Import** (get a recipe in), **Library** (find it again), **Cook** (follow it hands-free), and **Plan** (decide what to make and buy).
 
@@ -66,10 +66,10 @@ The app is structured around four primary actions: **Import** (get a recipe in),
 
 ### Import — Share Extension
 
-20. As a user watching a cooking video on TikTok, Instagram, or YouTube, I want to tap Share in that app and choose MealKit, so that the video is sent directly to MealKit without me having to copy and paste a URL.
+20. As a user watching a cooking video on TikTok, Instagram, or YouTube, I want to tap Share in that app and choose yumplz, so that the video is sent directly to yumplz without me having to copy and paste a URL.
 21. As a user, I want the Share Extension to accept both video files and URLs shared from any app, so that it works across all social platforms regardless of how each app exposes its share sheet.
 22. As a user, I want the Share Extension to show a compact progress indicator while it queues the import, so that I know the item was received and will be processed.
-23. As a user, I want the main MealKit app to open automatically after sharing, so that I can review and save the imported recipe without extra navigation steps.
+23. As a user, I want the main yumplz app to open automatically after sharing, so that I can review and save the imported recipe without extra navigation steps.
 24. As a user, I want a pending import badge on the Library tab if I shared something while the app was closed, so that I know there is something waiting for me to review.
 
 ### AI Model Download
@@ -170,9 +170,9 @@ The app is structured around four primary actions: **Import** (get a recipe in),
 
 ### Recipe Sharing Out
 
-84. As a user, I want to share any recipe from my Library via the iOS share sheet as formatted plain text (title, ingredients, steps), so that I can send it to anyone via iMessage, email, or any other app without them needing MealKit installed.
+84. As a user, I want to share any recipe from my Library via the iOS share sheet as formatted plain text (title, ingredients, steps), so that I can send it to anyone via iMessage, email, or any other app without them needing yumplz installed.
 85. As a user, I want to share a recipe as a styled image card showing the title, hero photo, and key stats, so that I can post it to Instagram Stories or send it as a visual preview.
-86. As a user, I want to share a recipe via a `mealkit://` deep link that opens MealKit on another device and pre-loads the import sheet with that recipe's text, so that a friend with the app can save it with one tap.
+86. As a user, I want to share a recipe via a `yumplz://` deep link that opens yumplz on another device and pre-loads the import sheet with that recipe's text, so that a friend with the app can save it with one tap.
 
 ### Paywall and Subscriptions (App Store V1)
 
@@ -203,7 +203,7 @@ The app is structured around four primary actions: **Import** (get a recipe in),
 ### Core Modules
 
 **ModelDownloadManager**  
-Single-responsibility observable class that tracks download state per `LocalModel` (LLM GGUF, Whisper). Downloads via `URLSession`, stores to `Application Support/MealKitModels/`, excludes from iCloud backup. Exposes `ensureReady(_:)` which is a no-op if the file is already on disk. States: `idle → downloading(progress) → ready | failed`.
+Single-responsibility observable class that tracks download state per `LocalModel` (LLM GGUF, Whisper). Downloads via `URLSession`, stores to `Application Support/YumplzModels/`, excludes from iCloud backup. Exposes `ensureReady(_:)` which is a no-op if the file is already on disk. States: `idle → downloading(progress) → ready | failed`.
 
 **InferenceService**  
 Observable façade over a private `LlamaActor` (Swift actor). Actor serialises all llama.cpp C API calls (single-threaded requirement). Provides `complete(system:prompt:maxNewTokens:temperature:)` and the higher-level `parseRecipe(from:)`. State: `idle → loading → ready | failed`.
@@ -265,7 +265,7 @@ All top-level views use `.ultraThinMaterial` glass cards over a warm cream gradi
 - **`ModelDownloadManager` state** — Assert that calling `ensureReady` when a model file already exists returns immediately in `.ready` state without starting a download task.
 - **`GroceryList` aggregation** (future) — Given a set of `PlannedMeal` records with overlapping `Ingredient` names and units, assert that the aggregated `GroceryItem` list has the correct summed quantities and correct `StoreCategory` grouping.
 
-**Prior art in the codebase:** `MealKitTests.swift` already has a test that verifies `ModelContainer` initialisation and a basic `Recipe → Ingredient` relationship insert. New tests should follow the same in-memory `ModelContainer` pattern.
+**Prior art in the codebase:** `yumplzTests.swift` already has a test that verifies `ModelContainer` initialisation and a basic `Recipe → Ingredient` relationship insert. New tests should follow the same in-memory `ModelContainer` pattern.
 
 ---
 
@@ -296,4 +296,4 @@ All top-level views use `.ultraThinMaterial` glass cards over a warm cream gradi
 
 **Model update path.** Updating the on-device LLM version requires shipping a new app binary that points to a new model URL. The download manager checks the filename, so renaming the GGUF file (e.g., `Llama-3.2-3B-Instruct-Q4_K_M-v2.gguf`) triggers a re-download on the next `ensureReady` call.
 
-**Naming.** "MealKit" is a placeholder. The final product name should be checked for App Store availability and trademark conflict before submission. The bundle ID `com.abhishekbiju.mealkit` must be updated in `project.yml` if the name changes.
+**Naming.** Display name **yumplz** (all lowercase). Bundle ID `com.abhishekbiju.yumplz` in `project.yml`. Run App Store + trademark checks before submission.

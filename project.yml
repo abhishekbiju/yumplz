@@ -2,7 +2,7 @@
 # from the repo root. The .xcodeproj is git-ignored; this file is the source of
 # truth for project configuration.
 
-name: MealKit
+name: Yumplz
 
 options:
   bundleIdPrefix: com.abhishekbiju
@@ -30,52 +30,45 @@ configs:
 
 # ── Swift Package Manager dependencies ────────────────────────────────────────
 packages:
-  # Swift-native wrapper around llama.cpp (ADR 0004). Versioning mirrors
-  # llama.cpp build numbers (major.build.patch). The CoreML/Metal backend is
-  # enabled by default on Apple Silicon — no extra build flags required.
   LlamaSwift:
     url: https://github.com/mattt/llama.swift
     from: "2.9055.0"
 
-  # Argmax Open-Source SDK — ships WhisperKit (CoreML port of OpenAI Whisper)
-  # alongside TTSKit / SpeakerKit. We only import the WhisperKit product.
   ArgmaxOSS:
     url: https://github.com/argmaxinc/argmax-oss-swift
     from: "1.0.0"
 
 # ── Targets ───────────────────────────────────────────────────────────────────
 targets:
-  MealKit:
+  Yumplz:
     type: application
     platform: iOS
     sources:
-      - path: MealKit
+      - path: Yumplz
         excludes:
           - "**/.DS_Store"
     resources:
-      - path: MealKit/Resources
+      - path: Yumplz/Resources
         optional: true
     dependencies:
       - package: LlamaSwift
         product: LlamaSwift
       - package: ArgmaxOSS
         product: WhisperKit
-      - target: MealKitShareExtension
+      - target: YumplzShareExtension
         embed: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.mealkit
-        PRODUCT_NAME: MealKit
-        TARGETED_DEVICE_FAMILY: "1"  # iPhone only at V1
+        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.yumplz
+        PRODUCT_NAME: Yumplz
+        TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        CODE_SIGN_ENTITLEMENTS: MealKit/MealKit.entitlements
-    # Explicit Info.plist — the auto-generated variant silently drops
-    # UIBackgroundModes (not in Apple's INFOPLIST_KEY_* allowlist).
+        CODE_SIGN_ENTITLEMENTS: Yumplz/Yumplz.entitlements
     info:
-      path: MealKit/Info.plist
+      path: Yumplz/Info.plist
       properties:
-        CFBundleDisplayName: MealKit
+        CFBundleDisplayName: yumplz
         LSApplicationCategoryType: public.app-category.food-and-drink
         UIStatusBarStyle: UIStatusBarStyleDefault
         UILaunchScreen:
@@ -91,64 +84,47 @@ targets:
           - audio
           - processing
         NSUserActivityTypes:
-          - com.abhishekbiju.mealkit.importRecipe
+          - com.abhishekbiju.yumplz.importRecipe
         CFBundleURLTypes:
-          - CFBundleURLName: com.abhishekbiju.mealkit.import
+          - CFBundleURLName: com.abhishekbiju.yumplz.import
             CFBundleURLSchemes:
-              - mealkit
-        NSCameraUsageDescription: "MealKit uses the camera to import recipes from photos of cookbooks, magazines, and handwritten notes."
-        NSPhotoLibraryUsageDescription: "MealKit reads photos from your library to import recipes from screenshots and saved images."
-        NSPhotoLibraryAddUsageDescription: "MealKit saves recipe photos to your library when you choose to export them."
-        NSMicrophoneUsageDescription: "MealKit listens for voice commands while you cook (e.g. set a timer, stop a timer) when you tap the microphone."
-        NSSpeechRecognitionUsageDescription: "MealKit converts your spoken timer commands to text so it can act on them."
+              - yumplz
+        NSCameraUsageDescription: "yumplz uses the camera to import recipes from photos of cookbooks, magazines, and handwritten notes."
+        NSPhotoLibraryUsageDescription: "yumplz reads photos from your library to import recipes from screenshots and saved images."
+        NSPhotoLibraryAddUsageDescription: "yumplz saves recipe photos to your library when you choose to export them."
+        NSMicrophoneUsageDescription: "yumplz listens for voice commands while you cook (e.g. set a timer, stop a timer) when you tap the microphone."
+        NSSpeechRecognitionUsageDescription: "yumplz converts your spoken timer commands to text so it can act on them."
     entitlements:
-      path: MealKit/MealKit.entitlements
+      path: Yumplz/Yumplz.entitlements
       properties:
-        # ── Capabilities requiring a PAID Apple Developer Program account ──
-        # Uncomment these blocks once you enroll at developer.apple.com/enroll
-        # (required before TestFlight or App Store submission).
-        #
-        # com.apple.developer.icloud-container-identifiers:
-        #   - iCloud.com.abhishekbiju.mealkit
-        # com.apple.developer.icloud-services:
-        #   - CloudKit
-        # com.apple.developer.ubiquity-container-identifiers: []
-        # com.apple.developer.applesignin:
-        #   - Default
-        # aps-environment: development
-        #
-        # ── App Group — shared container with Share Extension ─────────────
-        # Works in simulator without provisioning; requires paid account on device.
         com.apple.security.application-groups:
-          - group.com.abhishekbiju.mealkit
+          - group.com.abhishekbiju.yumplz
         com.apple.developer.associated-domains: []
 
-  MealKitShareExtension:
+  YumplzShareExtension:
     type: app-extension
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: MealKitShareExtension
-      # Also include PendingImportStore from the main app sources so the
-      # extension can write to the shared queue without duplicating code.
-      - path: MealKit/Services/PendingImportStore.swift
-      - path: MealKit/Services/Import/SocialPlatformDetector.swift
-      - path: MealKit/Services/ShareImportPreferences.swift
+      - path: YumplzShareExtension
+      - path: Yumplz/Services/PendingImportStore.swift
+      - path: Yumplz/Services/Import/SocialPlatformDetector.swift
+      - path: Yumplz/Services/ShareImportPreferences.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.mealkit.shareextension
-        INFOPLIST_FILE: MealKitShareExtension/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.yumplz.shareextension
+        INFOPLIST_FILE: YumplzShareExtension/Info.plist
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
     entitlements:
-      path: MealKitShareExtension/MealKitShareExtension.entitlements
+      path: YumplzShareExtension/YumplzShareExtension.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.abhishekbiju.mealkit
+          - group.com.abhishekbiju.yumplz
     info:
-      path: MealKitShareExtension/Info.plist
+      path: YumplzShareExtension/Info.plist
       properties:
-        CFBundleDisplayName: MealKit
+        CFBundleDisplayName: yumplz
         NSExtension:
           NSExtensionAttributes:
             NSExtensionActivationRule:
@@ -158,32 +134,32 @@ targets:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
 
-  MealKitTests:
+  YumplzTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: MealKitTests
+      - path: YumplzTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.mealkit.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.abhishekbiju.yumplz.tests
         GENERATE_INFOPLIST_FILE: YES
         BUNDLE_LOADER: "$(TEST_HOST)"
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/MealKit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MealKit"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Yumplz.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Yumplz"
     dependencies:
-      - target: MealKit
+      - target: Yumplz
 
 schemes:
-  MealKit:
+  Yumplz:
     build:
       targets:
-        MealKit: all
-        MealKitShareExtension: all
-        MealKitTests: [test]
+        Yumplz: all
+        YumplzShareExtension: all
+        YumplzTests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - MealKitTests
+        - YumplzTests
     archive:
       config: Release

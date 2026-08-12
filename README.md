@@ -1,6 +1,8 @@
 <div align="center">
 
-# MealKit
+<img src="docs/assets/icon/yumplz-app-icon-256.png" width="96" alt="yumplz app icon" />
+
+# yumplz
 
 **Save any recipe. Cook it later.**
 
@@ -9,15 +11,19 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-195%20passing-brightgreen.svg)](#testing)
 
-> **Work in progress** — MealKit is under active development. Core flows work in the simulator today; CloudKit sync, App Store distribution, and the Content Library ingest pipeline are planned next. Expect breaking changes.
+> **Work in progress** — yumplz is under active development. Core flows work in the simulator today; CloudKit sync, App Store distribution, and the Content Library ingest pipeline are planned next. Expect breaking changes.
 
 </div>
 
 ---
 
-MealKit is a native **iOS recipe manager and meal planner** built with **SwiftUI**, **SwiftData**, and **fully on-device AI**. Import recipes from Safari, TikTok, YouTube, photos, or pasted text — parsed locally with Llama 3.2 3B — then organise them in a Collections-first library, plan your week, and cook hands-free in Cook Mode.
+yumplz is a native **iOS recipe manager and meal planner** built with **SwiftUI**, **SwiftData**, and **fully on-device AI**. Import recipes from Safari, TikTok, YouTube, photos, or pasted text — parsed locally with Llama 3.2 3B — then organise them in a Collections-first library, plan your week, and cook hands-free in Cook Mode.
 
 No backend. No API keys in the client. No cloud inference.
+
+### Name check
+
+**yumplz** (all lowercase) is a coined `yum` + `plz` mark — clearer than generic “yumyum” and no direct recipe-app match found at rename time. Still run your own [App Store](https://appstoreconnect.apple.com) name + trademark search before submission.
 
 <p align="center">
   <img src="docs/screenshots/discover.png" width="220" alt="Discover tab — curated house recipes" />
@@ -59,10 +65,10 @@ sudo xcodebuild -license accept
 ### Build & run
 
 ```bash
-git clone https://github.com/abhishekbiju/mealkit-ios.git
-cd mealkit-ios
+git clone https://github.com/abhishekbiju/yumplz.git
+cd yumplz
 xcodegen generate
-open MealKit.xcodeproj
+open Yumplz.xcodeproj
 ```
 
 In Xcode: **Signing & Capabilities → set your Team** (required for Share Extension App Groups on a physical device). The bundle ID prefix is `com.abhishekbiju` — change it in [`project.yml`](project.yml) if you fork.
@@ -75,11 +81,11 @@ In Xcode: **Signing & Capabilities → set your Team** (required for Share Exten
 xcodegen generate
 
 xcodebuild build \
-  -scheme MealKit \
+  -scheme Yumplz \
   -destination 'platform=iOS Simulator,name=iPhone 17'
 
 xcodebuild test \
-  -scheme MealKit \
+  -scheme Yumplz \
   -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
@@ -89,12 +95,12 @@ xcodebuild test \
 ./scripts/capture-screenshots.sh
 ```
 
-Requires a booted **iPhone 17** simulator. Uses DEBUG-only `MEALKIT_SCREENSHOT_MODE` (not compiled into Release).
+Requires a booted **iPhone 17** simulator. Uses DEBUG-only `YUMPLZ_SCREENSHOT_MODE` (not compiled into Release).
 
 ## Project layout
 
 ```
-MealKit/
+Yumplz/
 ├── App/                 Entry point, tabs, auth gate
 ├── Models/              SwiftData entities (Recipe, Ingredient, Step, …)
 ├── Features/
@@ -108,11 +114,11 @@ MealKit/
 ├── Services/
 │   ├── Import/          URL routing, OCR, social extractors, sanitizer
 │   └── Inference/       Llama + WhisperKit wrappers, JSON parser
-└── Resources/           Assets, HouseRecipes.json
+└── Resources/           Assets (AppIcon, Logo, AccentColor), HouseRecipes.json
 
-MealKitShareExtension/   Share-to-MealKit extension
-MealKitTests/            195 XCTest cases
-docs/                    PRD, ADRs, screenshots
+YumplzShareExtension/   Share-to-yumplz extension
+YumplzTests/            195 XCTest cases
+docs/assets/             Exported icon sizes for marketing
 CONTEXT.md               Domain glossary
 project.yml              xcodegen spec (source of truth — .xcodeproj is gitignored)
 ```
@@ -157,4 +163,4 @@ Model weights are downloaded at runtime from public Hugging Face URLs — they a
 
 ---
 
-<p align="center"><sub>MealKit is a working title. Final branding TBD before App Store submission.</sub></p>
+<p align="center"><sub>App icon and marketing assets live in <code>docs/assets/</code> and <code>Yumplz/Resources/Assets.xcassets/</code>.</sub></p>

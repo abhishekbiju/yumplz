@@ -224,13 +224,13 @@ holds identity data.
 An iOS app extension that receives items (URLs, video files) shared from
 other apps via the iOS share sheet and queues them as pending imports in
 a shared App Group container. The extension itself is a lightweight
-receiver — it does not run the LLM. The main MealKit app picks up
+receiver — it does not run the LLM. The main yumplz app picks up
 pending items on next foreground and runs the full import pipeline.
 
 ## House Recipe
 
 A Recipe bundled with the app (V1: as JSON in the app bundle) or later
-served from CloudKit Public Database. Authored by the MealKit team.
+served from CloudKit Public Database. Authored by the yumplz team.
 Displayed in the Discover tab. Functionally identical to a user-saved
 Recipe once copied into the personal Library. The user's copy is
 independent — edits on either side do not propagate.

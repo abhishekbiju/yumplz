@@ -1,0 +1,174 @@
+import XCTest
+import SwiftData
+@testable import Yumplz
+
+final class LibraryTests: XCTestCase {
+
+    // MARK: - Slice 1: SystemCollection.favorites
+
+    @MainActor
+    func testFavoritesFilterReturnsOnlyFavorites() {
+        let fav = Recipe(title: "Fav")
+        fav.isFavorite = true
+
+        let notFav = Recipe(title: "Not Fav")
+        notFav.isFavorite = false
+
+        let results = SystemCollection.favorites.filter([fav, notFav])
+
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(results.first?.title, "Fav")
+    }
+
+    // MARK: - Slice 2: SystemCollection.recentlyAdded caps at 30
+
+    @MainActor
+    func testRecentlyAddedCapsAt30AndSortsNewestFirst() {
+        let base = Date(timeIntervalSinceReferenceDate: 0)
+        let recipes: [Recipe] = (0..<35).map { i in
+            let r = Recipe(title: "Recipe \(i)")
+            r.createdAt = base.addingTimeInterval(TimeInterval(i * 60))
+            return r
+        }
+
+        let results = SystemCollection.recentlyAdded.filter(recipes)
+
+        XCTAssertEqual(results.count, 30)
+        XCTAssertEqual(results.first?.title, "Recipe 34")
+        XCTAssertEqual(results.last?.title, "Recipe 5")
+    }
+
+    // MARK: - Slice 3: SystemCollection.toTry excludes needsReview
+
+    @MainActor
+    func testToTryExcludesNeedsReview() {
+        let eligible = Recipe(title: "To Try")
+        eligible.timesCooked = 0
+        eligible.needsReview = false
+
+        let needsReviewRecipe = Recipe(title: "Needs Review")
+        needsReviewRecipe.timesCooked = 0
+        needsReviewRecipe.needsReview = true
+
+        let alreadyCooked = Recipe(title: "Already Cooked")
+        alreadyCooked.timesCooked = 3
+        alreadyCooked.needsReview = false
+
+        let results = SystemCollection.toTry.filter([eligible, needsReviewRecipe, alreadyCooked])
+
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(results.first?.title, "To Try")
+    }
+
+    // MARK: - Slice 7: Favorite toggle persists
+
+    @MainActor
+    func testFavoriteTogglePersists() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        let recipe = Recipe(title: "Toggle Test")
+        context.insert(recipe)
+        try context.save()
+
+        recipe.isFavorite = true
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Recipe>())
+        XCTAssertEqual(fetched.first?.isFavorite, true)
+    }
+
+    // MARK: - Slice 8: User Collection CRUD
+
+    @MainActor
+    func testAddRecipeToCollectionPersists() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        let recipe = Recipe(title: "Weeknight Pasta")
+        let collection = RecipeCollection(name: "Weeknight Dinners")
+        context.insert(recipe)
+        context.insert(collection)
+        collection.recipes?.append(recipe)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<RecipeCollection>())
+        XCTAssertEqual(fetched.first?.recipes?.count, 1)
+        XCTAssertEqual(fetched.first?.recipes?.first?.title, "Weeknight Pasta")
+    }
+
+    @MainActor
+    func testNewCollectionSeedsWithFiveLatestRecipes() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        for i in 0..<7 {
+            let recipe = Recipe(title: "Recipe \(i)")
+            recipe.createdAt = Date().addingTimeInterval(TimeInterval(i))
+            context.insert(recipe)
+        }
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<Recipe>(
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        ))
+        let collection = RecipeCollection(name: "Dinners")
+        RecipeCollection.seedNewCollection(collection, from: all)
+        context.insert(collection)
+        try context.save()
+
+        XCTAssertEqual(collection.recipeCount, 5)
+        let titles = Set(collection.recipes?.map(\.title) ?? [])
+        XCTAssertTrue(titles.contains("Recipe 6"))
+        XCTAssertFalse(titles.contains("Recipe 0"))
+    }
+
+    @MainActor
+    func testDeleteCollectionDoesNotDeleteRecipe() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        let recipe = Recipe(title: "Survivor Recipe")
+        let collection = RecipeCollection(name: "Temp Collection")
+        context.insert(recipe)
+        context.insert(collection)
+        collection.recipes?.append(recipe)
+        try context.save()
+
+        context.delete(collection)
+        try context.save()
+
+        let recipes = try context.fetch(FetchDescriptor<Recipe>())
+        XCTAssertEqual(recipes.count, 1)
+        XCTAssertEqual(recipes.first?.title, "Survivor Recipe")
+    }
+
+    @MainActor
+    func testDeleteRecipeRemovesFromLibrary() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+
+        let keep = Recipe(title: "Keep Me")
+        let remove = Recipe(title: "Delete Me")
+        context.insert(keep)
+        context.insert(remove)
+        try context.save()
+
+        RecipeLibraryActions.delete(remove, in: context)
+
+        let recipes = try context.fetch(FetchDescriptor<Recipe>())
+        XCTAssertEqual(recipes.count, 1)
+        XCTAssertEqual(recipes.first?.title, "Keep Me")
+    }
+
+#if DEBUG
+    @MainActor
+    func testDebugSeederAddsSixSampleRecipesWhenLibraryEmpty() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+        DebugSeeder.seedIfLibraryEmpty(into: context)
+        let count = try context.fetchCount(FetchDescriptor<Recipe>())
+        XCTAssertEqual(count, 6)
+    }
+#endif
+}

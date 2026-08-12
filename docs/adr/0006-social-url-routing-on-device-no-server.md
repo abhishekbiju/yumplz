@@ -5,7 +5,7 @@
 
 ## Context
 
-Users share TikTok, Instagram, and YouTube URLs (and video files) to MealKit via the Share Extension. The app must extract recipe text from these before passing it to the local LLM. The options were:
+Users share TikTok, Instagram, and YouTube URLs (and video files) to yumplz via the Share Extension. The app must extract recipe text from these before passing it to the local LLM. The options were:
 
 1. **Server-side extraction** (yt-dlp + hosted Whisper) — reliable for all platforms, but introduces server infrastructure costs, contradicts the "zero server cost" goal, and creates a maintenance burden for a solo developer.
 2. **On-device extraction** — zero cost, fully private, but platform-dependent and occasionally brittle.
@@ -21,7 +21,7 @@ Implement a `SocialURLRouter` that runs entirely on-device using the following p
 | **YouTube** | YouTube Timedtext API (`/api/timedtext?v=ID&lang=en`) — no key, stable, returns full captions | Free |
 | **TikTok** | Parse `__UNIVERSAL_DATA_FOR_REHYDRATION__` JSON from server-rendered page HTML; extract `desc` (caption) and, if caption is < 50 words, download audio-only CDN URL and transcribe via WhisperKit | Free |
 | **TikTok (Tier 3)** | Scan description/caption for recipe blog URL → HTML scrape | Free |
-| **Instagram URL** | No reliable on-device path; show graceful prompt guiding user to save video to Photos and share the file to MealKit | Free |
+| **Instagram URL** | No reliable on-device path; show graceful prompt guiding user to save video to Photos and share the file to yumplz | Free |
 | **Video file (any source)** | WhisperKit on-device transcription | Free |
 | **Recipe blogs** | HTML scraping (existing `fetchRecipeText`) | Free |
 

@@ -22,7 +22,7 @@ instructions without embedding real values.
 
 ## What is safe to commit
 
-- Bundle identifiers and App Group IDs (`com.abhishekbiju.mealkit`) — these are
+- Bundle identifiers and App Group IDs (`com.abhishekbiju.yumplz`) — these are
   public identifiers, not secrets
 - Public model download URLs (Hugging Face GGUF / WhisperKit bundles)
 - Architecture decision records and product documentation
