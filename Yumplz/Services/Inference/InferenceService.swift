@@ -123,6 +123,15 @@ private actor LlamaActor {
     // MARK: Lifecycle
 
     func load(modelURL: URL) throws {
+        // Actor calls serialize, so if a concurrent import already loaded a model
+        // by the time this call runs, loading again would leak the first
+        // model/context/sampler (never freed below) and force a second import's
+        // generation to queue behind a redundant reload instead of just the
+        // first import's real inference — the two together can look like a
+        // many-minutes "stuck" import when it's really two imports serialized
+        // behind one shared model instance.
+        guard model == nil else { return }
+
         Self.configureBackendForPlatform()
         llama_backend_init()
 

@@ -219,6 +219,11 @@ struct ImportSheetView: View {
     }
 
     private func handleSourceSelected(_ kind: ImportSourceKind) {
+        // Guards against a double-tap on "Import" registering twice during the
+        // sourcePicker -> importing transition animation, which would create
+        // two placeholder Recipes and kick off two redundant background imports.
+        guard phase == .sourcePicker else { return }
+
         if kind == .manual {
             createManualEntry()
             return

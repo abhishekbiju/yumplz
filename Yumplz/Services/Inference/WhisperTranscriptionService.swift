@@ -26,6 +26,9 @@ final class WhisperTranscriptionService {
     /// Ensures WhisperKit is ready. Downloads the model on first call.
     func ensureReady() async throws {
         if case .ready = state { return }
+        guard !ModelDownloadManager.isRunningInXcodePreview else {
+            throw TranscriptionError.unavailableInPreview
+        }
         state = .downloading(progress: 0)
         do {
             let modelDirectory = ModelDownloadManager.modelsDirectory.path
@@ -134,6 +137,7 @@ private func _extractAudioConcrete(from videoURL: URL) async throws -> URL {
 enum TranscriptionError: LocalizedError {
     case notReady
     case audioExtractionFailed
+    case unavailableInPreview
 
     var errorDescription: String? {
         switch self {
@@ -141,6 +145,8 @@ enum TranscriptionError: LocalizedError {
             return "The transcription model is not loaded yet."
         case .audioExtractionFailed:
             return "Could not extract audio from the video URL."
+        case .unavailableInPreview:
+            return "AI import isn't available in Xcode Previews — run the app (Cmd+R) on a Simulator or device to test this."
         }
     }
 }

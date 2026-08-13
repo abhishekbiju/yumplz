@@ -113,11 +113,23 @@ final class ModelDownloadManager: NSObject {
         states[model.rawValue] ?? .idle
     }
 
+    /// Xcode's Canvas/Live Preview hosts views in a lightweight, resource-constrained
+    /// process not meant for multi-gigabyte downloads or on-device LLM inference —
+    /// driving a real import there exhausts its memory/time budget and the canvas
+    /// shows "Preview crashed" with no useful diagnostics. Fail fast with a clear
+    /// error instead; test import flows with a real Simulator/device run (Cmd+R).
+    static var isRunningInXcodePreview: Bool {
+        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    }
+
     /// Returns the local URL immediately if already cached, otherwise starts
     /// a download and throws once the download begins (caller should observe
     /// `state(for:)` for completion).
     @discardableResult
     func ensureReady(_ model: LocalModel) async throws -> URL {
+        guard !Self.isRunningInXcodePreview else {
+            throw DownloadError.unavailableInPreview
+        }
         if let url = cachedURL(for: model) {
             states[model.rawValue] = .ready(url: url)
             return url
@@ -275,6 +287,7 @@ extension ModelDownloadManager: URLSessionDownloadDelegate, @unchecked Sendable 
 enum DownloadError: LocalizedError {
     case alreadyInProgress
     case modelNotFound(LocalModel)
+    case unavailableInPreview
 
     var errorDescription: String? {
         switch self {
@@ -282,6 +295,8 @@ enum DownloadError: LocalizedError {
             return "A download is already in progress for this model."
         case .modelNotFound(let model):
             return "The model \(model.displayName) could not be found after download."
+        case .unavailableInPreview:
+            return "AI import isn't available in Xcode Previews — run the app (Cmd+R) on a Simulator or device to test this."
         }
     }
 }
