@@ -49,11 +49,31 @@ struct RecipeCardView: View {
                 ProgressView()
                     .controlSize(.small)
             }
-            Text(recipe.importStatusLabel)
-                .font(.mkCaption)
-                .foregroundStyle(recipe.importFailed ? .orange : .secondary)
-                .lineLimit(2)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(recipe.importStatusLabel)
+                    .font(.mkCaption)
+                    .foregroundStyle(recipe.importFailed ? .orange : .secondary)
+                    .lineLimit(2)
+                // On-device AI parsing has no incremental progress to report,
+                // and can run several minutes — a static label with no ticking
+                // clock is indistinguishable from a hang. A live elapsed timer
+                // is the cheapest honest signal that it's still working.
+                if !recipe.importFailed, let importedAt = recipe.importedAt {
+                    TimelineView(.periodic(from: importedAt, by: 1)) { context in
+                        Text(Self.elapsedLabel(from: importedAt, to: context.date))
+                            .font(.mkCaption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
         }
+    }
+
+    private static func elapsedLabel(from start: Date, to now: Date) -> String {
+        let seconds = max(0, Int(now.timeIntervalSince(start)))
+        let minutes = seconds / 60
+        let remainder = seconds % 60
+        return minutes > 0 ? "\(minutes)m \(remainder)s" : "\(remainder)s"
     }
 
     private var metadataRow: some View {
