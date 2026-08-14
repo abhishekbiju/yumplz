@@ -39,41 +39,54 @@ struct RecipeCardView: View {
         .opacity(isImporting ? 0.92 : 1)
     }
 
+    private var isParsingWithAI: Bool {
+        recipe.importPhaseRaw == ImportPhase.parsingWithAI.storageKey
+    }
+
     private var importStatusRow: some View {
         HStack(spacing: 8) {
             if recipe.importFailed {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
                     .font(.system(size: 13))
-            } else {
+            } else if !isParsingWithAI {
                 ProgressView()
                     .controlSize(.small)
             }
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(recipe.importStatusLabel)
                     .font(.mkCaption)
                     .foregroundStyle(recipe.importFailed ? .orange : .secondary)
                     .lineLimit(2)
-                // On-device AI parsing has no incremental progress to report,
-                // and can run several minutes — a static label with no ticking
-                // clock is indistinguishable from a hang. A live elapsed timer
-                // is the cheapest honest signal that it's still working.
-                if !recipe.importFailed, let importedAt = recipe.importedAt {
+                // On-device AI parsing has no real progress to report (we don't
+                // know token count ahead of time) and can run several minutes —
+                // a static label or plain spinner is indistinguishable from a
+                // hang. Fake-determinate bar: eases toward (never reaches) a
+                // cap from elapsed time alone, calibrated against measured
+                // on-device durations (~236s typical, ~400s+ with a retry), so
+                // it keeps visibly creeping even on a slow run.
+                if !recipe.importFailed, isParsingWithAI, let importedAt = recipe.importedAt {
                     TimelineView(.periodic(from: importedAt, by: 1)) { context in
-                        Text(Self.elapsedLabel(from: importedAt, to: context.date))
-                            .font(.mkCaption)
-                            .foregroundStyle(.tertiary)
+                        let progress = Self.roughParsingProgress(
+                            elapsed: context.date.timeIntervalSince(importedAt)
+                        )
+                        VStack(alignment: .leading, spacing: 2) {
+                            ProgressView(value: progress)
+                                .tint(.accentColor)
+                            Text("\(Int(progress * 100))%")
+                                .font(.mkCaption)
+                                .foregroundStyle(.tertiary)
+                        }
                     }
                 }
             }
         }
     }
 
-    private static func elapsedLabel(from start: Date, to now: Date) -> String {
-        let seconds = max(0, Int(now.timeIntervalSince(start)))
-        let minutes = seconds / 60
-        let remainder = seconds % 60
-        return minutes > 0 ? "\(minutes)m \(remainder)s" : "\(remainder)s"
+    private static func roughParsingProgress(elapsed: TimeInterval) -> Double {
+        let cap = 0.95
+        let timeConstant: TimeInterval = 120
+        return cap * (1 - exp(-elapsed / timeConstant))
     }
 
     private var metadataRow: some View {
