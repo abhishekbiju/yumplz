@@ -5,7 +5,7 @@ import Foundation
 enum RecipeJSONParser {
 
     static func parseRecipeDTO(from modelOutput: String) throws -> ParsedRecipeDTO {
-        guard let jsonString = modelOutput.extractedJSONObject() else {
+        guard let jsonString = modelOutput.repairingMissingKeyQuotes().extractedJSONObject() else {
             throw InferenceError.noJSONInResponse(modelOutput)
         }
         guard let data = jsonString.data(using: .utf8) else {
@@ -20,6 +20,23 @@ enum RecipeJSONParser {
 }
 
 extension String {
+
+    /// Llama 3.2 3B reliably drops the opening quote of the next key right
+    /// after an empty string value — `"unit":"",name":"eggplant"` instead of
+    /// `"unit":"","name":"eggplant"`. Observed to repeat multiple times in a
+    /// single response (e.g. after both `"unit":""` and `"prep":""`), and it
+    /// breaks JSON syntax outright rather than just a value's type, so it has
+    /// to be repaired before brace-balance parsing even runs.
+    func repairingMissingKeyQuotes() -> String {
+        guard let regex = try? NSRegularExpression(pattern: #",([A-Za-z_][A-Za-z0-9_]*)":"#) else {
+            return self
+        }
+        return regex.stringByReplacingMatches(
+            in: self,
+            range: NSRange(startIndex..., in: self),
+            withTemplate: #","$1":"#
+        )
+    }
 
     /// Extracts the first balanced `{ ... }` JSON object from LLM output.
     /// Falls back to repairing truncated JSON when the model hits its token limit.

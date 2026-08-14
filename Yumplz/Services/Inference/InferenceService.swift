@@ -148,6 +148,11 @@ private actor LlamaActor {
         var cparams = llama_context_default_params()
         cparams.n_ctx   = nCtx
         cparams.n_batch = UInt32(nBatch)
+        // Measured: raising n_threads to the full core count made single-token
+        // decode slower, not faster (566s vs 402s for the same prompt) — this
+        // step is memory-bandwidth-bound, not compute-bound, so extra threads
+        // add synchronization overhead without a throughput gain. Leave
+        // llama.cpp's own default alone.
         guard let c = llama_init_from_model(m, cparams) else {
             llama_model_free(m)
             throw InferenceError.contextInitFailed
@@ -245,13 +250,45 @@ private actor LlamaActor {
         let maxPosition = min(Int(nCtx), nCur + max(1, maxNewTokens))
         var generatedTokens = 0
 
+        // The prompt asks for exactly one JSON object and nothing else, but
+        // small models don't reliably emit an end-of-generation token right
+        // after the closing brace — left unchecked, decoding keeps running
+        // (often to the full token ceiling) well after the actual answer is
+        // already complete. Track brace depth incrementally as tokens stream
+        // in and stop the instant a balanced top-level object closes, the
+        // same way `balancedJSONObject()` parses it afterwards, just online.
+        var jsonDepth = 0
+        var sawOpenBrace = false
+        var inJSONString = false
+        var jsonEscaped = false
+
         while nCur < maxPosition, generatedTokens < maxNewTokens {
             let newToken = llama_sampler_sample(sampler, ctx, -1)
             if llama_vocab_is_eog(vocab, newToken) { break }
 
             llama_sampler_accept(sampler, newToken)
-            result += tokenToPiece(vocab: vocab, token: newToken)
+            let piece = tokenToPiece(vocab: vocab, token: newToken)
+            result += piece
             generatedTokens += 1
+
+            for character in piece {
+                if inJSONString {
+                    if jsonEscaped {
+                        jsonEscaped = false
+                    } else if character == "\\" {
+                        jsonEscaped = true
+                    } else if character == "\"" {
+                        inJSONString = false
+                    }
+                    continue
+                }
+                switch character {
+                case "\"": inJSONString = true
+                case "{": jsonDepth += 1; sawOpenBrace = true
+                case "}": jsonDepth -= 1
+                default: break
+                }
+            }
 
             batch.n_tokens = 1
             batch.token[0] = newToken
@@ -264,6 +301,8 @@ private actor LlamaActor {
 
             guard llama_decode(ctx, batch) == 0 else { break }
             nCur += 1
+
+            if sawOpenBrace && jsonDepth <= 0 { break }
         }
 
         return result.trimmingCharacters(in: .whitespacesAndNewlines)

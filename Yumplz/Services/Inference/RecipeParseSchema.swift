@@ -87,7 +87,15 @@ struct ParsedRecipeDTO: Codable, Sendable {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             originalText = try container.decodeIfPresent(String.self, forKey: .originalText)?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            quantity = try container.decodeIfPresent(Double.self, forKey: .quantity)
+            // The model sometimes quotes numeric-looking values (e.g. "1" or
+            // "1/2 cup" instead of 1) — fall back to nil on a type mismatch
+            // rather than failing the whole recipe decode; RecipeImportEnricher
+            // already re-derives quantity from source text when it's nil.
+            if let value = try? container.decodeIfPresent(Double.self, forKey: .quantity) {
+                quantity = value
+            } else {
+                quantity = nil
+            }
             unit = try container.decodeIfPresent(String.self, forKey: .unit)
             let decodedName = try container.decodeIfPresent(String.self, forKey: .name)?
                 .trimmingCharacters(in: .whitespacesAndNewlines)
